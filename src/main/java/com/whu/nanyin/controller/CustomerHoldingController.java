@@ -1,7 +1,7 @@
 package com.whu.nanyin.controller;
 
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.service.CustomerHoldingService;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.service.CustomerHoldingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

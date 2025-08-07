@@ -1,8 +1,8 @@
 package com.whu.nanyin.service;
 import java.time.LocalDate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.FundTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -12,8 +12,8 @@ import org.springframework.retry.annotation.Backoff; // 【1. 新增】导入Bac
 import org.springframework.retry.annotation.Retryable; // 【1. 新增】导入Retryable
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import com.whu.hongjing.pojo.dto.RiskAssessmentSubmitDTO;
-import com.whu.hongjing.pojo.entity.Customer;
+import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
+import com.whu.nanyin.pojo.entity.Customer;
 
 /**
  * 这是一个专门用于并发写入模拟数据的辅助服务。

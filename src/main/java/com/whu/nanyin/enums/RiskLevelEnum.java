@@ -1,6 +1,6 @@
 package com.whu.nanyin.enums;
 
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.constants.TaggingConstants;
+import com.whu.nanyin.constants.TaggingConstants;
 import lombok.Getter;
 
 /**

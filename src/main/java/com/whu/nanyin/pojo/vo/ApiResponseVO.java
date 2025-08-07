@@ -1,4 +1,4 @@
-// 文件位置: src/main/java/com/whu/hongjing/pojo/vo/ApiResponseVO.java
+// 文件位置: src/main/java/com/whu/nanyin/pojo/vo/ApiResponseVO.java
 package com.whu.nanyin.pojo.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;

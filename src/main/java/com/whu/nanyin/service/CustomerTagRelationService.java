@@ -1,8 +1,8 @@
 package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.whu.hongjing.pojo.entity.CustomerTagRelation;
-import com.whu.hongjing.pojo.vo.TagVO;
+import com.whu.nanyin.pojo.entity.CustomerTagRelation;
+import com.whu.nanyin.pojo.vo.TagVO;
 import java.util.List;
 import java.util.Map;
 

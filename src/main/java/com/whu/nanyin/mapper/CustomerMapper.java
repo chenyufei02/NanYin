@@ -2,8 +2,8 @@ package com.whu.nanyin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.vo.ProfitLossVO;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.vo.ProfitLossVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

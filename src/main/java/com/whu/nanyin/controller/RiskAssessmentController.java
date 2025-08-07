@@ -1,9 +1,9 @@
 package com.whu.nanyin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.whu.hongjing.pojo.dto.RiskAssessmentSubmitDTO; // 1. 导入新的DTO
-import com.whu.hongjing.pojo.entity.RiskAssessment;
-import com.whu.hongjing.service.RiskAssessmentService;
+import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO; // 1. 导入新的DTO
+import com.whu.nanyin.pojo.entity.RiskAssessment;
+import com.whu.nanyin.service.RiskAssessmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

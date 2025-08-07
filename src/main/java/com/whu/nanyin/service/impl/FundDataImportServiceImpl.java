@@ -1,8 +1,8 @@
 package com.whu.nanyin.service.impl;
 
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.FundDataImportService;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.FundInfoService;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.service.FundDataImportService;
+import com.whu.nanyin.service.FundInfoService;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;

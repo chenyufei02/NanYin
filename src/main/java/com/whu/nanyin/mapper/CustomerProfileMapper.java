@@ -1,7 +1,7 @@
 package com.whu.nanyin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.whu.hongjing.pojo.entity.CustomerProfile;
+import com.whu.nanyin.pojo.entity.CustomerProfile;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

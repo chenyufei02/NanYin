@@ -1,8 +1,8 @@
-// 文件位置: src/main/java/com/whu/hongjing/pojo/vo/DashboardFilteredResultVO.java
+// 文件位置: src/main/java/com/whu/nanyin/pojo/vo/DashboardFilteredResultVO.java
 package com.whu.nanyin.pojo.vo;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.Customer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;

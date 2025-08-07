@@ -1,9 +1,9 @@
 package com.whu.nanyin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.whu.hongjing.pojo.entity.CustomerTagRelation;
+import com.whu.nanyin.pojo.entity.CustomerTagRelation;
 import org.apache.ibatis.annotations.Mapper;
-import com.whu.hongjing.pojo.vo.TagVO;
+import com.whu.nanyin.pojo.vo.TagVO;
 import org.apache.ibatis.annotations.Select;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;

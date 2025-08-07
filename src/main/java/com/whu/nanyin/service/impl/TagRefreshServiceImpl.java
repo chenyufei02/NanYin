@@ -1,14 +1,13 @@
 package com.whu.nanyin.service.impl;
 
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.CustomerService;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.FundInfoService;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.TagRefreshService;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.TagRefreshWorker;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.service.CustomerService;
+import com.whu.nanyin.service.FundInfoService;
+import com.whu.nanyin.service.TagRefreshService;
+import com.whu.nanyin.service.TagRefreshWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;

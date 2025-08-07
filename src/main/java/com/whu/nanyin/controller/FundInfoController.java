@@ -1,16 +1,16 @@
 package com.whu.nanyin.controller;
 
-//import com.whu.hongjing.pojo.dto.FundInfoDTO;
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.pojo.vo.ApiResponseVO;
-import com.whu.hongjing.service.FundInfoService;
+//import com.whu.nanyin.pojo.dto.FundInfoDTO;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.pojo.vo.ApiResponseVO;
+import com.whu.nanyin.service.FundInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 //import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.whu.hongjing.service.FundDataImportService;
+import com.whu.nanyin.service.FundDataImportService;
 
 import java.util.List;
 

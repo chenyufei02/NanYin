@@ -1,9 +1,9 @@
 package com.whu.nanyin.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.whu.hongjing.mapper.CustomerProfileMapper;
-import com.whu.hongjing.pojo.entity.CustomerProfile;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.CustomerProfileService;
+import com.whu.nanyin.mapper.CustomerProfileMapper;
+import com.whu.nanyin.pojo.entity.CustomerProfile;
+import com.whu.nanyin.service.CustomerProfileService;
 import org.springframework.stereotype.Service;
 
 @Service
