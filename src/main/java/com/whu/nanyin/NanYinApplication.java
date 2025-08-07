@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+// 测试注释2
 @SpringBootApplication
 @MapperScan("com.whu.nanyin.mapper")
 @EnableScheduling
