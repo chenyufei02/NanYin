@@ -1,12 +1,12 @@
 package com.whu.nanyin.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.whu.hongjing.constants.TaggingConstants;
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.vo.DashboardFilteredResultVO;
-import com.whu.hongjing.pojo.vo.TagVO;
-import com.whu.hongjing.service.CustomerService;
-import com.whu.hongjing.service.CustomerTagRelationService;
+import com.whu.nanyin.constants.TaggingConstants;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.vo.DashboardFilteredResultVO;
+import com.whu.nanyin.pojo.vo.TagVO;
+import com.whu.nanyin.service.CustomerService;
+import com.whu.nanyin.service.CustomerTagRelationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

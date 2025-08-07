@@ -2,7 +2,7 @@ package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.whu.hongjing.pojo.entity.FundInfo;
+import com.whu.nanyin.pojo.entity.FundInfo;
 
 public interface FundInfoService extends IService<FundInfo> {
 

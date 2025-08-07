@@ -2,11 +2,11 @@ package com.whu.nanyin.service.impl;
 
 import com.github.javafaker.Faker;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.pojo.entity.FundTransaction;
-import com.whu.hongjing.service.*;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;

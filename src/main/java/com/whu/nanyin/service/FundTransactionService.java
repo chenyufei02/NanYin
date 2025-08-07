@@ -2,10 +2,10 @@ package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.whu.hongjing.pojo.dto.FundPurchaseDTO;
-import com.whu.hongjing.pojo.dto.FundRedeemDTO;
-import com.whu.hongjing.pojo.entity.FundTransaction;
-import com.whu.hongjing.pojo.vo.FundTransactionVO;
+import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
+import com.whu.nanyin.pojo.dto.FundRedeemDTO;
+import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.vo.FundTransactionVO;
 
 public interface FundTransactionService extends IService<FundTransaction> {
     // 创建一个新方法，它不仅保存交易，还负责触发持仓更新

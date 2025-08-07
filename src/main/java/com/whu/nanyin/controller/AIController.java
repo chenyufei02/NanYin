@@ -1,13 +1,13 @@
-// 文件: src/main/java/com/whu/hongjing/controller/AIController.java
+// 文件: src/main/java/com/whu/nanyin/controller/AIController.java
 package com.whu.nanyin.controller;
 
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.pojo.entity.CustomerTagRelation;
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.pojo.vo.ApiResponseVO;
-import com.whu.hongjing.pojo.vo.ProfitLossVO;
-import com.whu.hongjing.service.*;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.CustomerTagRelation;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.pojo.vo.ApiResponseVO;
+import com.whu.nanyin.pojo.vo.ProfitLossVO;
+import com.whu.nanyin.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

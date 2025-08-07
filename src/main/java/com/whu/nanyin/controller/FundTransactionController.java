@@ -1,10 +1,10 @@
 package com.whu.nanyin.controller;
 
-import com.whu.hongjing.pojo.dto.FundPurchaseDTO; //
-import com.whu.hongjing.pojo.dto.FundRedeemDTO;   //
+import com.whu.nanyin.pojo.dto.FundPurchaseDTO; //
+import com.whu.nanyin.pojo.dto.FundRedeemDTO;   //
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.whu.hongjing.pojo.entity.FundTransaction;
-import com.whu.hongjing.service.FundTransactionService;
+import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.service.FundTransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,10 @@
 package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.whu.hongjing.pojo.dto.RiskAssessmentSubmitDTO;
-import com.whu.hongjing.pojo.entity.RiskAssessment;
+import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
+import com.whu.nanyin.pojo.entity.RiskAssessment;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.whu.hongjing.pojo.vo.RiskAssessmentVO;
+import com.whu.nanyin.pojo.vo.RiskAssessmentVO;
 
 public interface RiskAssessmentService extends IService<RiskAssessment> {
 

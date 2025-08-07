@@ -3,9 +3,9 @@ package com.whu.nanyin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.whu.hongjing.mapper.FundInfoMapper;
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.FundInfoService;
+import com.whu.nanyin.mapper.FundInfoMapper;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.service.FundInfoService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

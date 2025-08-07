@@ -1,14 +1,14 @@
 package com.whu.nanyin.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.whu.hongjing.mapper.CustomerTagRelationMapper;
-import com.whu.hongjing.pojo.entity.CustomerTagRelation;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.CustomerTagRelationService;
+import com.whu.nanyin.mapper.CustomerTagRelationMapper;
+import com.whu.nanyin.pojo.entity.CustomerTagRelation;
+import com.whu.nanyin.service.CustomerTagRelationService;
 import org.springframework.stereotype.Service;
-import com.whu.hongjing.pojo.vo.TagVO;
+import com.whu.nanyin.pojo.vo.TagVO;
 import java.util.*;
 import java.util.stream.Collectors;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.constants.TaggingConstants;
+import com.whu.nanyin.constants.TaggingConstants;
 import org.springframework.util.StringUtils;
 
 

@@ -3,16 +3,16 @@ package com.whu.nanyin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.exception.InsufficientFundsException;
-import com.whu.hongjing.mapper.FundTransactionMapper;
-import com.whu.hongjing.pojo.dto.FundPurchaseDTO;
-import com.whu.hongjing.pojo.dto.FundRedeemDTO;
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.pojo.entity.FundTransaction;
-import com.whu.hongjing.pojo.vo.FundTransactionVO;
-import com.whu.hongjing.service.*;
-import com.whu.hongjing.pojo.entity.FundInfo;
+import com.whu.nanyin.exception.InsufficientFundsException;
+import com.whu.nanyin.mapper.FundTransactionMapper;
+import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
+import com.whu.nanyin.pojo.dto.FundRedeemDTO;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.vo.FundTransactionVO;
+import com.whu.nanyin.service.*;
+import com.whu.nanyin.pojo.entity.FundInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -159,7 +159,7 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     /**
      * 分页查询
      * @param page customerName, fundCode, transactionType]
-     * @return com.baomidou.mybatisplus.extension.plugins.pagination.Page<com.whu.hongjing.pojo.vo.FundTransactionVO>
+     * @return com.baomidou.mybatisplus.extension.plugins.pagination.Page<com.whu.nanyin.pojo.vo.FundTransactionVO>
      * @author yufei
      * @since 2025/7/9
      */
