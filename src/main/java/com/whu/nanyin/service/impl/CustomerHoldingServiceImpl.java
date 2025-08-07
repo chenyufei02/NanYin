@@ -3,20 +3,20 @@ package com.whu.nanyin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.whu.hongjing.mapper.CustomerHoldingMapper;
-import com.whu.hongjing.pojo.entity.Customer;
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.pojo.entity.FundInfo;
-import com.whu.hongjing.pojo.entity.FundTransaction;
-import com.whu.hongjing.pojo.vo.CustomerHoldingVO;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.CustomerHoldingService;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.CustomerService;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.FundTransactionService;
+import com.whu.nanyin.mapper.CustomerHoldingMapper;
+import com.whu.nanyin.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.FundInfo;
+import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.vo.CustomerHoldingVO;
+import com.whu.nanyin.service.CustomerHoldingService;
+import com.whu.nanyin.service.CustomerService;
+import com.whu.nanyin.service.FundTransactionService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.FundInfoService;
+import com.whu.nanyin.service.FundInfoService;
 import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class CustomerHoldingServiceImpl extends ServiceImpl<CustomerHoldingMappe
      * 根据ID查询持仓情况
      *
      * @param customerId
-     * @return java.util.List<com.whu.hongjing.pojo.entity.CustomerHolding>
+     * @return java.util.List<com.whu.nanyin.pojo.entity.CustomerHolding>
      * @author yufei
      * @since 2025/7/4
      */

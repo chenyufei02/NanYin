@@ -1,8 +1,8 @@
 package com.whu.nanyin.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.whu.hongjing.pojo.vo.ProfitLossVO;
+import com.whu.nanyin.pojo.vo.ProfitLossVO;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.whu.hongjing.pojo.entity.Customer;
+import com.whu.nanyin.pojo.entity.Customer;
 //import java.util.List;
 
 public interface CustomerService extends IService<Customer>{

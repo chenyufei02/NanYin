@@ -1,9 +1,9 @@
 package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.constants.TaggingConstants;
-import com.whu.hongjing.enums.RiskLevelEnum;
-import com.whu.hongjing.pojo.entity.*;
+import com.whu.nanyin.constants.TaggingConstants;
+import com.whu.nanyin.enums.RiskLevelEnum;
+import com.whu.nanyin.pojo.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;

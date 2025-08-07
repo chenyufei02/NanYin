@@ -1,11 +1,11 @@
 package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.whu.hongjing.pojo.entity.CustomerHolding;
-import com.whu.hongjing.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.FundTransaction;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.whu.hongjing.pojo.vo.CustomerHoldingVO;
+import com.whu.nanyin.pojo.vo.CustomerHoldingVO;
 
 
 public interface CustomerHoldingService extends IService<CustomerHolding> {

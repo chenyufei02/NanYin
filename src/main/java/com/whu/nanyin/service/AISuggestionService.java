@@ -1,7 +1,7 @@
 package com.whu.nanyin.service;
 
-import com.whu.hongjing.pojo.entity.CustomerTagRelation;
-import com.whu.hongjing.pojo.vo.ProfitLossVO;
+import com.whu.nanyin.pojo.entity.CustomerTagRelation;
+import com.whu.nanyin.pojo.vo.ProfitLossVO;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;

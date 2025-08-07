@@ -1,7 +1,7 @@
 package com.whu.nanyin.controller;
-import com.whu.hongjing.service.ScheduledTasksService;
-import com.whu.hongjing.pojo.vo.ApiResponseVO;
-import com.whu.hongjing.service.MockDataService;
+import com.whu.nanyin.service.ScheduledTasksService;
+import com.whu.nanyin.pojo.vo.ApiResponseVO;
+import com.whu.nanyin.service.MockDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,10 @@
 package com.whu.nanyin.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.constants.TaggingConstants;
-import com.whu.hongjing.pojo.entity.CustomerTagRelation;
-import com.whu.hongjing.pojo.vo.ProfitLossVO;
-import com.whu.hongjing.hongjing.src.main.java.com.whu.hongjing.service.AISuggestionService;
+import com.whu.nanyin.constants.TaggingConstants;
+import com.whu.nanyin.pojo.entity.CustomerTagRelation;
+import com.whu.nanyin.pojo.vo.ProfitLossVO;
+import com.whu.nanyin.service.AISuggestionService;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;

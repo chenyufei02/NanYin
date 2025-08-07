@@ -1,7 +1,7 @@
 package com.whu.nanyin.controller;
 
-import com.whu.hongjing.pojo.vo.ApiResponseVO; // <-- 1. 导入我们新的VO类
-import com.whu.hongjing.service.TagRefreshService;
+import com.whu.nanyin.pojo.vo.ApiResponseVO; // <-- 1. 导入我们新的VO类
+import com.whu.nanyin.service.TagRefreshService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
