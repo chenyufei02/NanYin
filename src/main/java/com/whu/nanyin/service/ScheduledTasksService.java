@@ -32,8 +32,7 @@ public class ScheduledTasksService {
     // 注入事务写入服务
     @Autowired
     private DailyUpdateWriterService dailyUpdateWriterService;
-    @Autowired
-    private TagRefreshService tagRefreshService;
+
 
     /**
      * 【任务一】每日下午收盘后，更新基金净值与客户持仓市值。
@@ -177,23 +176,6 @@ public class ScheduledTasksService {
     }
 
 
-
-    /**
-     * 【任务二】每日凌晨，批量刷新所有客户的画像标签。
-     * 这是一个计算和IO密集型任务，安排在系统负载最低的凌晨执行。
-     */
-    @Scheduled(cron = "0 0 2 * * ?") // 每天 02:00 执行
-    public void refreshAllCustomerTagsDaily() {
-        System.out.println("【定时任务】开始执行每日全量客户画像刷新...");
-        try {
-            // 直接调用已经写好的并发刷新服务
-            tagRefreshService.refreshAllTagsAtomically();
-            System.out.println("【定时任务】每日全量客户画像刷新任务圆满完成！");
-        } catch (Exception e) {
-            System.err.println("【定时任务】在执行每日全量客户画像刷新时发生严重错误！");
-            e.printStackTrace();
-        }
-    }
 
 
  }
