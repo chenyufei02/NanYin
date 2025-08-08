@@ -35,9 +35,6 @@ import org.springframework.util.StringUtils;
 @Service
 public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMapper, FundTransaction> implements FundTransactionService {
 
-    @Autowired
-    @Lazy
-    private TagRefreshService tagRefreshService;
 
     @Autowired
     private CustomerService customerService;
@@ -146,10 +143,6 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
         // 步骤2：调用客户持仓服务，根据这笔新交易实时更新持仓信息
         customerHoldingService.updateHoldingAfterNewTransaction(transaction);
 
-        // 立即为该客户刷新标签
-        System.out.println("【实时刷新】交易完成，触发客户 " + transaction.getCustomerId() + " 的标签刷新...");
-        tagRefreshService.refreshTagsForCustomer(transaction.getCustomerId());
-        System.out.println("【实时刷新】客户 " + transaction.getCustomerId() + " 的标签已刷新完毕！");
 
         // 步骤3：返回包含ID的完整交易实体
         return transaction;

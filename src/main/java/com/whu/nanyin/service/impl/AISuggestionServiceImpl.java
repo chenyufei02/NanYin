@@ -1,8 +1,6 @@
 package com.whu.nanyin.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.whu.nanyin.constants.TaggingConstants;
-import com.whu.nanyin.pojo.entity.CustomerTagRelation;
 import com.whu.nanyin.pojo.vo.ProfitLossVO;
 import com.whu.nanyin.service.AISuggestionService;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class AISuggestionServiceImpl implements AISuggestionService {
@@ -27,21 +24,72 @@ public class AISuggestionServiceImpl implements AISuggestionService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    // 请注意：出于安全考虑，不应将API密钥硬编码在代码中。
+    // 在实际生产环境中，应将其存储在外部配置文件或环境变量中。
     private static final String BEARER_TOKEN = "sk-NCcKP3c4YSsOSt92q5u6Vp3vUFLifWCkZHK7cL9CkAdi9hgl";
     private static final String API_URL = "https://api.moonshot.cn/v1/chat/completions";
 
+    /**
+     * 为指定客户生成营销建议（已重构为个人投资者视角）
+     * @param profitLossVO 客户的盈亏统计
+     * @param assetAllocationData 资产类别分布图数据
+     * @return AI生成的营销话术建议
+     */
     @Override
-    public String getMarketingSuggestion(ProfitLossVO profitLossVO, List<CustomerTagRelation> tags, Map<String, BigDecimal> assetAllocationData) {
-        String prompt = buildAdvancedPrompt(profitLossVO, tags, assetAllocationData);
+    public String getMarketingSuggestion(ProfitLossVO profitLossVO, Map<String, BigDecimal> assetAllocationData) {
+        // 调用新版的prompt构建方法
+        String prompt = buildAdvancedPrompt(profitLossVO, assetAllocationData);
         try {
-            return callSparkHttpAPI(prompt);
+            return callMoonshotApi(prompt);
         } catch (Exception e) {
             e.printStackTrace();
             return "【AI建议生成失败】调用API时发生错误：" + e.getMessage();
         }
     }
 
-    private String callSparkHttpAPI(String prompt) throws Exception {
+    /**
+     * 构建面向个人投资者的AI投资助手提示词（Prompt）
+     * @param profitLossVO 用户的盈亏数据
+     * @param assetAllocationData 用户的资产配置数据
+     * @return 最终发送给大语言模型的提示词字符串
+     */
+    private String buildAdvancedPrompt(ProfitLossVO profitLossVO, Map<String, BigDecimal> assetAllocationData) {
+        StringBuilder sb = new StringBuilder();
+
+        // 1. 设置AI的角色和目标
+        sb.append("你是一位专业的、风格亲切的AI投资助手。请根据以下用户的投资数据，为TA生成一份清晰易懂、充满鼓励的个性化投资分析报告。请直接面向用户，使用“您”作为称呼。\n\n");
+
+        // 2. 呈现用户数据
+        sb.append("--- 您的投资数据 ---\n\n");
+        sb.append("**1. 业绩概览:**\n");
+        sb.append(String.format("- **总资产**: %.2f 元\n- **累计投入**: %.2f 元\n- **当前总盈亏**: **%.2f 元 (回报率 %.2f%%)**\n\n",
+                profitLossVO.getTotalMarketValue(),
+                profitLossVO.getTotalInvestment(),
+                profitLossVO.getTotalProfitLoss(),
+                profitLossVO.getProfitLossRate()));
+
+        sb.append("**2. 资产配置:**\n- **持仓分布**: ");
+        if (assetAllocationData == null || assetAllocationData.isEmpty()) {
+            sb.append("您当前暂无持仓。\n");
+        } else {
+            assetAllocationData.forEach((type, value) -> sb.append(String.format("%s (市值: %.2f), ", type, value)));
+            sb.delete(sb.length() - 2, sb.length()).append("。\n");
+        }
+        sb.append("\n");
+
+        // 3. 定义输出格式和要求
+        sb.append("--- AI智能分析报告 ---\n\n");
+        sb.append("请基于以上数据，生成以下两部分内容，语言要通俗易懂，多用鼓励性话语，避免使用过于专业的术语：\n");
+
+        sb.append("**1. 您的投资组合速览:** (简短总结，不超过100字)\n   - 对您当前的业绩和资产状况进行一句话总结，给予肯定或鼓励。\n   - 简要分析您的持仓特点（例如：是偏向稳健的债券型基金，还是偏向高增长的股票型基金）。\n\n");
+
+        sb.append("**2. AI智能分析与建议:** (分点阐述，每点不超过100字)\n   - **持仓分析与优化建议**: 根据您的持仓分布，判断是否存在过于集中或过于分散的问题，并提出具体的优化方向（例如：'建议适当增加一些稳健的债券型基金来平衡风险'或'您的配置非常多元化，能很好地抵御市场波动！'）。\n   - **后续操作建议**: 根据当前的盈亏状况，给出一个简单的后续操作建议。如果盈利，可以建议'继续持有，享受长期增长'或'考虑部分止盈'；如果亏损，可以建议'保持耐心，等待市场回暖'或'考虑定投摊低成本'。");
+
+        System.out.println("======【个人投资者版AI请求】发送给大模型的Prompt是：======\n" + sb);
+        return sb.toString();
+    }
+
+    private String callMoonshotApi(String prompt) throws Exception {
         Map<String, Object> message = new HashMap<>();
         message.put("role", "user");
         message.put("content", prompt);
@@ -78,58 +126,5 @@ public class AISuggestionServiceImpl implements AISuggestionService {
                 }
             }
         }
-    }
-
-    private String buildAdvancedPrompt( ProfitLossVO profitLossVO, List<CustomerTagRelation> tags, Map<String, BigDecimal> assetAllocationData) {
-        Map<String, String> tagMap = tags.stream()
-            .collect(Collectors.toMap(CustomerTagRelation::getTagCategory, CustomerTagRelation::getTagName, (t1, t2) -> t1));
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("你是一位顶级的基金投资策略分析师和营销专家。请为我（客户经理）提供一份关于目标客户的深度分析报告和营销策略。以下是该客户的相关数据：\n\n");
-        sb.append("--- 客户数据 ---\n\n");
-        sb.append("**1. 客户核心画像与业绩概览:**\n");
-        sb.append(String.format("- **身份**: %s, %s, %s。\n",
-                tagMap.getOrDefault(TaggingConstants.CATEGORY_AGE, "未知年龄"),
-                tagMap.getOrDefault(TaggingConstants.CATEGORY_GENDER, "未知性别"),
-                tagMap.getOrDefault(TaggingConstants.CATEGORY_OCCUPATION, "未知职业")));
-        sb.append(String.format("- **业绩**: 总资产 %.2f 元，累计投资 %.2f 元，当前盈亏 **%.2f 元 (盈亏率 %.2f%%)**。\n\n",
-                profitLossVO.getTotalMarketValue(),
-                profitLossVO.getTotalInvestment(),
-                profitLossVO.getTotalProfitLoss(),
-                profitLossVO.getProfitLossRate()));
-
-        sb.append("**2. 资产配置与风险分析 :**\n");
-        sb.append("- **资产穿透**: ");
-        if (assetAllocationData.isEmpty()) {
-            sb.append("客户暂无持仓。\n");
-        } else {
-            assetAllocationData.forEach((type, value) -> sb.append(String.format("%s (市值: %.2f), ", type, value)));
-            sb.delete(sb.length() - 2, sb.length()).append("。\n");
-        }
-
-        String diagnosis = tagMap.getOrDefault(TaggingConstants.CATEGORY_RISK_DIAGNOSIS, "未知");
-        sb.append(String.format("- **风险诊断**: 客户的风险匹配状态是: **%s**。\n\n", diagnosis));
-
-        sb.append("**3. 客户动态与潜在风险:**\n");
-        String recencyTag = tagMap.getOrDefault(TaggingConstants.CATEGORY_RECENCY, "未知");
-        sb.append(String.format("- **近期动向**: %s。", recencyTag));
-        if (recencyTag.equals(TaggingConstants.LABEL_RECENCY_SHORT_LOST) || recencyTag.equals(TaggingConstants.LABEL_RECENCY_LONG_OUTFLOW)) {
-            sb.append(" **【高危预警：客户已有流失倾向！】**");
-        }
-        sb.append("\n\n");
-
-        sb.append("--- 营销执行方案 ---\n\n");
-        sb.append("请基于以上数据，针对该客户生成以下两部分内容(以下内容请注意分行，格式清晰层次分明的分段回答，不要一大段文字挤在一起。)：\n");
-
-        sb.append("**1. 核心洞察与策略 (面向我们客户经理生成针对该客户的分析和内部建议，因此请不要直接面向客户称呼您，而是面向我们客户经理称呼为该客户):** (不超过200字) \n：" +
-                "一、基本画像：总结年龄 性别 职业，与投资盈亏情况，给予打气鼓励或安慰等。" +
-                "二、持仓分布：分析该客户的持仓特点，给予适当的平衡建议。（根据“-”前面的前缀进行分类计算持仓，例如指数型、债券型、股票型、混合型、货币型。） " +
-                "三、交易行为分析：如果近期是流失倾向给流失预警与资产挽留建议、如果近期是沉睡或停滞状态则给沉睡与停滞激活建议，根据近期行为给一种。" +
-                "四、风险再平衡沟通：首先判断当前用户的风险诊断是行为保守型（代表该用户过于保守了）还是行为激进型（代表过于激进了），前者则指出可推荐更激进的策略、后者则相反，根据判断结果给出一种即可。" +
-                "五、高潜力客户深挖建议：主要看资产规模与近期交易频率是否符合高潜力客户（资产规模较多且近期流失或不够活跃，如果不符合就不用生成这一条。）\n\n");
-        sb.append("**2. 微信沟通话术 (给客户的外部话术):** (不超过200字) \n作为客户经理，写一段可以直接复制发送给客户的微信沟通话术。话术需体现出对客户投资状况的专业洞察，并自然地引出你的营销策略（例如：预约沟通、推荐产品、提示风险等），最好具体指明推荐的处理方式和推荐处理的基金类型。");
-
-        System.out.println("======【V2版AI请求】发送给大模型的Prompt是：======\n" + sb);
-        return sb.toString();
     }
 }

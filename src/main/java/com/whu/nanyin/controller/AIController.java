@@ -3,7 +3,6 @@ package com.whu.nanyin.controller;
 
 import com.whu.nanyin.pojo.entity.Customer;
 import com.whu.nanyin.pojo.entity.CustomerHolding;
-import com.whu.nanyin.pojo.entity.CustomerTagRelation;
 import com.whu.nanyin.pojo.entity.FundInfo;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.ProfitLossVO;
@@ -27,7 +26,6 @@ public class AIController {
 
     @Autowired private CustomerService customerService;
     @Autowired private AISuggestionService aiSuggestionService;
-    @Autowired private CustomerTagRelationService customerTagRelationService;
     @Autowired private CustomerHoldingService customerHoldingService;
     @Autowired private FundInfoService fundInfoService;
 
@@ -42,7 +40,7 @@ public class AIController {
         try {
             // 1. 获取AI建议所需的所有原始数据
             ProfitLossVO profitLossVO = customerService.getProfitLossVO(customerId);
-            List<CustomerTagRelation> tags = customerTagRelationService.lambdaQuery().eq(CustomerTagRelation::getCustomerId, customerId).list();
+
             List<CustomerHolding> holdings = customerHoldingService.listByCustomerId(customerId);
             Map<String, FundInfo> fundInfoMap = fundInfoService.list().stream().collect(Collectors.toMap(FundInfo::getFundCode, Function.identity()));
 
@@ -51,7 +49,7 @@ public class AIController {
 
 
             // 3. 调用AI服务
-            String suggestion = aiSuggestionService.getMarketingSuggestion( profitLossVO, tags, assetAllocationData);
+            String suggestion = aiSuggestionService.getMarketingSuggestion(profitLossVO, assetAllocationData);
             return ApiResponseVO.success("建议生成成功", suggestion);
 
         } catch (Exception e) {

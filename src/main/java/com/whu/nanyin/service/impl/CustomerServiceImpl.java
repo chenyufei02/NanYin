@@ -3,19 +3,13 @@ package com.whu.nanyin.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.whu.nanyin.mapper.CustomerMapper;
 import com.whu.nanyin.pojo.entity.Customer;
-//import com.whu.nanyin.pojo.entity.CustomerTagRelation;
 import com.whu.nanyin.service.CustomerService;
-import com.whu.nanyin.service.CustomerTagRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-//import java.util.ArrayList;
-import java.util.List;
-//import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 import com.whu.nanyin.pojo.vo.ProfitLossVO;
-import java.util.Arrays;
 
 
 @Service
@@ -23,8 +17,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
 
     @Autowired
     private CustomerMapper customerMapper;
-    @Autowired
-    private CustomerTagRelationService customerTagRelationService;
+
 
     // 删除的方法
     @Override
@@ -79,16 +72,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
 
 
         if (StringUtils.hasText(tagName)) {
-            // 单个多个tagName都要统一转换为列表，才好调用多标签查询方法
-            List<String> tagList = Arrays.asList(tagName.split(","));
-            // 这里调用了外面根据tags查询客户ID的方法
-            List<Long> customerIds = customerTagRelationService.findCustomerIdsByTags(tagList);
-
-            if (customerIds.isEmpty()) {
-                // 如果根据标签没有找到任何客户，直接返回空结果，避免无效查询
-                return new Page<>(page.getCurrent(), page.getSize(), 0);
-            }
-            queryWrapper.in("id", customerIds);  // 把根据TAGS模糊查询（in）的SQL语句添加进querywrapper
+            queryWrapper.in("id");  // 把根据TAGS模糊查询（in）的SQL语句添加进querywrapper
         }
 
 
