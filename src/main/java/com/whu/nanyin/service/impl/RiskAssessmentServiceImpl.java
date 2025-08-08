@@ -3,16 +3,13 @@ package com.whu.nanyin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.whu.nanyin.constants.TaggingConstants;
 import com.whu.nanyin.enums.RiskLevelEnum;
 import com.whu.nanyin.mapper.RiskAssessmentMapper;
 import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
 import com.whu.nanyin.pojo.entity.Customer;
-import com.whu.nanyin.pojo.entity.CustomerTagRelation;
 import com.whu.nanyin.pojo.entity.RiskAssessment;
 import com.whu.nanyin.pojo.vo.RiskAssessmentVO;
 import com.whu.nanyin.service.CustomerService;
-import com.whu.nanyin.service.CustomerTagRelationService;
 import com.whu.nanyin.service.RiskAssessmentService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +26,7 @@ public class RiskAssessmentServiceImpl extends ServiceImpl<RiskAssessmentMapper,
     @Autowired
     private CustomerService customerService;
 
-    @Autowired
-    private CustomerTagRelationService customerTagRelationService;
+
 
     @Override
     public RiskAssessment createAssessment(RiskAssessmentSubmitDTO dto) {
@@ -76,8 +72,6 @@ public class RiskAssessmentServiceImpl extends ServiceImpl<RiskAssessmentMapper,
                 tagFilters.add(riskDiagnosis);
             }
 
-            // 2. 调用接收List的方法
-            customerIdsToFilter = new HashSet<>(customerTagRelationService.findCustomerIdsByTags(tagFilters));
 
             if (customerIdsToFilter.isEmpty()) {
                 page.setRecords(Collections.emptyList());
@@ -153,39 +147,8 @@ public class RiskAssessmentServiceImpl extends ServiceImpl<RiskAssessmentMapper,
             return page.setRecords(Collections.emptyList());
         }
 
-        // 步骤 4: 批量获取关联数据（客户姓名和标签），用于填充VO
-        List<Long> resultCustomerIds = assessmentRecords.stream()
-                .map(RiskAssessment::getCustomerId).distinct().collect(Collectors.toList());
 
-        Map<Long, String> customerIdToNameMap = customerService.listByIds(resultCustomerIds).stream()
-                .collect(Collectors.toMap(Customer::getId, Customer::getName));
 
-        List<String> targetCategories = List.of(TaggingConstants.CATEGORY_RISK_ACTUAL, TaggingConstants.CATEGORY_RISK_DIAGNOSIS);
-        List<CustomerTagRelation> relatedTags = customerTagRelationService.lambdaQuery()
-                .in(CustomerTagRelation::getCustomerId, resultCustomerIds)
-                .in(CustomerTagRelation::getTagCategory, targetCategories)
-                .list();
-        Map<Long, Map<String, String>> customerTagsMap = relatedTags.stream()
-                .collect(Collectors.groupingBy(
-                        CustomerTagRelation::getCustomerId,
-                        Collectors.toMap(CustomerTagRelation::getTagCategory, CustomerTagRelation::getTagName, (t1, t2) -> t1)
-                ));
-
-        // 步骤 5: 组装最终的VO列表
-        List<RiskAssessmentVO> voRecords = assessmentRecords.stream().map(assessment -> {
-            RiskAssessmentVO vo = new RiskAssessmentVO();
-            BeanUtils.copyProperties(assessment, vo);
-            vo.setCustomerName(customerIdToNameMap.get(assessment.getCustomerId()));
-            Map<String, String> tagsForCustomer = customerTagsMap.get(assessment.getCustomerId());
-            if (tagsForCustomer != null) {
-                vo.setActualRiskLevel(tagsForCustomer.get(TaggingConstants.CATEGORY_RISK_ACTUAL));
-                vo.setRiskDiagnosis(tagsForCustomer.get(TaggingConstants.CATEGORY_RISK_DIAGNOSIS));
-            }
-            return vo;
-        }).collect(Collectors.toList());
-
-        // 设置并返回最终的分页结果
-        page.setRecords(voRecords);
         page.setTotal(assessmentPage.getTotal());
         return page;
     }
