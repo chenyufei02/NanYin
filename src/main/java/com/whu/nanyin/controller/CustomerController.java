@@ -1,10 +1,7 @@
 package com.whu.nanyin.controller;
 
-import com.whu.nanyin.pojo.dto.CustomerDTO;
 import com.whu.nanyin.pojo.dto.CustomerUpdateDTO;
 import com.whu.nanyin.pojo.entity.Customer;
-//import com.whu.nanyin.pojo.vo.CustomerVO;
-//import java.util.stream.Collectors;
 import com.whu.nanyin.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,31 +25,6 @@ public class CustomerController {
     private CustomerService customerService;
 
 
-// =========== 以下三个增删改在pagecontroller里显示列表页面后，在列表页面里点击相应的操作后由前端script绑定到这里的方法进行实现 =========
-    /**
-     * 【增】处理新增客户的API。
-     * @param dto 包含新客户信息的DTO对象
-     * @return 操作是否成功
-     */
-    @Operation(summary = "新增客户")
-    @PostMapping("/add")
-    public boolean add(@RequestBody @Validated CustomerDTO dto) {
-        Customer customer = new Customer();
-        BeanUtils.copyProperties(dto, customer);
-        return customerService.save(customer);
-    }
-
-    /**
-     * 【删】处理删除客户的API。
-     * @param id 要删除的客户ID
-     * @return 操作是否成功
-     */
-    @Operation(summary = "根据ID删除客户")
-    @DeleteMapping("/delete/{id}")
-    public boolean deleteCustomer(@PathVariable Long id) {
-        return customerService.removeCustomer(id);
-    }
-
     /**
      * 【改】处理更新客户信息的API。
      * @param dto 包含客户更新信息的DTO对象
@@ -67,78 +39,6 @@ public class CustomerController {
     }
 
 
-/** 这里四个方法在pagecontroller中通过在customerList页面直接调用customerService.getCustomerPage直接进行了筛选与展示page
-
-    /**
-     * 【查】根据ID查询单个客户信息的API。
-     * @param id 客户ID
-     * @return 客户信息视图对象
-     * /
-    @Operation(summary = "根据ID查询客户")
-    @GetMapping("/{id}")
-    public CustomerVO getCustomerById(@PathVariable Long id) {
-        Customer customer = customerService.getCustomerById(id);
-        if (customer == null) {
-            return null;
-        }
-        CustomerVO vo = new CustomerVO();
-        BeanUtils.copyProperties(customer, vo);
-        return vo;
-    }
-
-    /**
-     * 【查】根据身份证号码查询客户的API。
-     * @param idNumber 身份证号码
-     * @return 客户信息视图对象
-     * /
-    @Operation(summary = "根据身份证号码查询客户")
-    @GetMapping("/search")
-    public CustomerVO getCustomerByIdNumber(@RequestParam String idNumber) {
-        Customer customer = customerService.getCustomerByIdNumber(idNumber);
-        if (customer == null) {
-            return null;
-        }
-        CustomerVO vo = new CustomerVO();
-        BeanUtils.copyProperties(customer, vo);
-        return vo;
-    }
-
-    /**
-     * 【查】根据姓名查询客户列表的API。
-     * @param name 客户姓名
-     * @return 客户信息视图对象列表
-     * /
-    @Operation(summary = "根据姓名查询客户列表（支持重名）")
-    @GetMapping("/search-by-name")
-    public List<CustomerVO> getCustomersByName(@RequestParam String name) {
-        List<Customer> customers = customerService.getCustomersByName(name);
-        return customers.stream().map(customer -> {
-            CustomerVO vo = new CustomerVO();
-            BeanUtils.copyProperties(customer, vo);
-            return vo;
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * 根据（单个）标签筛选客户列表的API。
-     * @param tagName 标签名称
-     * @return 客户信息视图对象列表
-     * /
-    @Operation(summary = "根据标签筛选客户列表")
-    @GetMapping("/by-tag")
-    public List<CustomerVO> listCustomersByTag(@RequestParam String tagName) {
-        List<Customer> customers = customerService.getCustomersByTag(tagName);
-        return customers.stream().map(customer -> {
-            CustomerVO vo = new CustomerVO();
-            BeanUtils.copyProperties(customer, vo);
-            return vo;
-        }).collect(Collectors.toList());
-    }
-**/
-
-
-/**在pagecontroller的【详情页】里通过MP提供的list方式实现了根据各种tags查询客户，删除了原本在这里的不全的方法
-**/
 
 
 
