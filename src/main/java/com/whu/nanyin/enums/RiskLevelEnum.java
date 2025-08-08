@@ -1,6 +1,5 @@
 package com.whu.nanyin.enums;
 
-import com.whu.nanyin.constants.TaggingConstants;
 import lombok.Getter;
 
 /**
