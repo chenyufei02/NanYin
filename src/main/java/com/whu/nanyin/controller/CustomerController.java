@@ -1,10 +1,7 @@
 package com.whu.nanyin.controller;
 
-import com.whu.nanyin.pojo.dto.CustomerDTO;
 import com.whu.nanyin.pojo.dto.CustomerUpdateDTO;
 import com.whu.nanyin.pojo.entity.Customer;
-//import com.whu.nanyin.pojo.vo.CustomerVO;
-//import java.util.stream.Collectors;
 import com.whu.nanyin.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
