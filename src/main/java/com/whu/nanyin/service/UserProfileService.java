@@ -7,7 +7,7 @@ import com.whu.nanyin.pojo.vo.ProfitLossVO;
 
 public interface UserProfileService extends IService<UserProfile> {
 
-    // 根据用户ID获取个人资料
+    // 根据用户的ID获取个人资料
     UserProfile getUserProfileByUserId(Long userId);
 
     // 更新用户个人资料
