@@ -22,7 +22,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private AuthenticationManager authenticationManager; // 下一步在SecurityConfig中配置
+    private AuthenticationManager authenticationManager;
     @Autowired
     private JwtTokenProvider tokenProvider;
 

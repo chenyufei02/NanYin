@@ -2,6 +2,7 @@ package com.whu.nanyin.controller;
 
 import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
 import com.whu.nanyin.pojo.entity.RiskAssessment;
+import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.RiskAssessmentVO;
 import com.whu.nanyin.service.RiskAssessmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,19 +26,24 @@ public class RiskAssessmentController {
 
     @Operation(summary = "提交一条新的风险评估记录")
     @PostMapping("/submit")
-    public ResponseEntity<RiskAssessmentVO> submitAssessment(@RequestBody @Validated RiskAssessmentSubmitDTO dto, Principal principal) {
-        Long currentUserId = Long.parseLong(principal.getName());
-        dto.setUserId(currentUserId);
-        RiskAssessment entity = riskAssessmentService.createAssessment(dto);
+    public ResponseEntity<ApiResponseVO<RiskAssessmentVO>> submitAssessment(@RequestBody @Validated RiskAssessmentSubmitDTO dto, Principal principal) {
+        try {
+            Long currentUserId = Long.parseLong(principal.getName());
+            dto.setUserId(currentUserId);
+            RiskAssessment entity = riskAssessmentService.createAssessment(dto);
 
-        RiskAssessmentVO vo = new RiskAssessmentVO();
-        BeanUtils.copyProperties(entity, vo);
-        return ResponseEntity.ok(vo);
+            RiskAssessmentVO vo = new RiskAssessmentVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("风险评估提交成功", vo));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponseVO.error("提交失败: " + e.getMessage()));
+        }
     }
 
     @Operation(summary = "查询【当前登录用户】的所有风险评估记录")
     @GetMapping("/my-assessments")
-    public ResponseEntity<List<RiskAssessmentVO>> getMyAssessments(Principal principal) {
+    public ResponseEntity<ApiResponseVO<List<RiskAssessmentVO>>> getMyAssessments(Principal principal) {
         Long currentUserId = Long.parseLong(principal.getName());
         List<RiskAssessment> assessmentEntities = riskAssessmentService.listByUserId(currentUserId);
 
@@ -49,6 +54,6 @@ public class RiskAssessmentController {
             return vo;
         }).collect(Collectors.toList());
 
-        return ResponseEntity.ok(assessmentVOs);
+        return ResponseEntity.ok(ApiResponseVO.success("风险评估记录获取成功", assessmentVOs));
     }
 }

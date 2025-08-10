@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class UserAuthService implements UserDetailsService {
 
     @Autowired
-    private UserMapper userMapper; // 我们需要一个UserMapper来查询数据库
+    private UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

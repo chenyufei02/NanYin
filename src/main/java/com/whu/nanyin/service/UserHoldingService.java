@@ -9,7 +9,7 @@ import com.whu.nanyin.pojo.vo.UserHoldingVO;
 
 public interface UserHoldingService extends IService<UserHolding> {
 
-    // 用于根据客户ID查询其所有持仓【优化为了4 综合根据多参数分页查询】
+    // 用于根据客户ID查询其所有持仓
     List<UserHolding> listByuserId(Long userId);
 
 

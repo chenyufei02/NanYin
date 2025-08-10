@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 @Tag(name = "AI助手", description = "提供基于大模型的智能分析与建议")
 public class AIController {
 
-    // 【修改】注入重命名后的 UserProfileService
+
     @Autowired private UserProfileService userProfileService;
     @Autowired private AISuggestionService aiSuggestionService;
     @Autowired private UserHoldingService userHoldingService;
     @Autowired private FundInfoService fundInfoService;
 
-    // --- 【核心安全改造】 ---
+
     @PostMapping("/suggestion")
     @Operation(summary = "为【当前登录用户】生成投资建议")
     public ApiResponseVO<String> generateSuggestionForCurrentUser(Principal principal) {
@@ -40,7 +40,6 @@ public class AIController {
 
         try {
             // 1. 获取AI建议所需的核心数据
-            // 【修改】调用正确命名的方法 getProfitLossVOByUserId
             ProfitLossVO profitLossVO = userProfileService.getProfitLossVOByUserId(currentUserId);
             if (profitLossVO == null) {
                 return ApiResponseVO.error("无法获取用户的盈亏数据。");

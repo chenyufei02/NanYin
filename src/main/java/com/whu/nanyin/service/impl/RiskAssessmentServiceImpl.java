@@ -39,7 +39,6 @@ public class RiskAssessmentServiceImpl extends ServiceImpl<RiskAssessmentMapper,
 
     public List<RiskAssessment> listByUserId(Long userId) {
         QueryWrapper<RiskAssessment> queryWrapper = new QueryWrapper<>();
-        // 【核心修改】确保查询的是正确的 user_id 列
         queryWrapper.eq("user_id", userId);
         queryWrapper.orderByDesc("assessment_date"); // 按评估日期降序
         return this.list(queryWrapper);

@@ -42,7 +42,7 @@ public class DailyUpdateWriterService {
 
     /**
      * 在独立的、可重试的事务中，批量更新持仓市值。
-     * 注意：这里我们不再为每个客户单独开启事务，而是将计算好的所有持仓更新对象，
+     * 注意：这里不再为每个客户单独开启事务，而是将计算好的所有持仓更新对象，
      * 在一个总的批量更新事务中完成，因为updateBatchById是按ID更新，冲突概率远小于“删后插”。
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)

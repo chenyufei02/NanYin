@@ -1,6 +1,7 @@
 package com.whu.nanyin.controller;
 
 import com.whu.nanyin.pojo.entity.UserHolding;
+import com.whu.nanyin.pojo.vo.ApiResponseVO; // <-- 【新增】导入ApiResponseVO
 import com.whu.nanyin.pojo.vo.UserHoldingVO;
 import com.whu.nanyin.service.UserHoldingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +27,10 @@ public class UserHoldingController {
 
     @Operation(summary = "查询【当前登录用户】的所有持仓信息")
     @GetMapping("/my-holdings")
-    public ResponseEntity<List<UserHoldingVO>> getMyHoldings(Principal principal) {
+    // 将返回类型用 ApiResponseVO 包装起来
+    public ResponseEntity<ApiResponseVO<List<UserHoldingVO>>> getMyHoldings(Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(ApiResponseVO.error("用户未登录"));
         }
         Long currentUserId = Long.parseLong(principal.getName());
 
@@ -42,6 +44,7 @@ public class UserHoldingController {
             return vo;
         }).collect(Collectors.toList());
 
-        return ResponseEntity.ok(holdingVOs);
+        // 将VO列表作为data，包装在ApiResponseVO中返回
+        return ResponseEntity.ok(ApiResponseVO.success("持仓列表获取成功", holdingVOs));
     }
 }

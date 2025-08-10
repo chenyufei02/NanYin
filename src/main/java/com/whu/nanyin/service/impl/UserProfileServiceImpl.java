@@ -34,7 +34,6 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
 
     @Override
     public ProfitLossVO getProfitLossVOByUserId(Long userId) {
-        // 直接调用我们已经重命名好的Mapper方法
         return getBaseMapper().getProfitLossVOByUserId(userId);
     }
 }

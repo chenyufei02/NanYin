@@ -3,6 +3,7 @@ package com.whu.nanyin.controller;
 import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
 import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.FundTransactionVO;
 import com.whu.nanyin.service.FundTransactionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,31 +28,41 @@ public class FundTransactionController {
 
     @Operation(summary = "申购基金")
     @PostMapping("/purchase")
-    public ResponseEntity<FundTransactionVO> purchase(@RequestBody @Validated FundPurchaseDTO dto, Principal principal) {
-        Long currentUserId = Long.parseLong(principal.getName());
-        dto.setUserId(currentUserId);
-        FundTransaction entity = fundTransactionService.createPurchaseTransaction(dto);
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> purchase(@RequestBody @Validated FundPurchaseDTO dto, Principal principal) {
+        try {
+            Long currentUserId = Long.parseLong(principal.getName());
+            dto.setUserId(currentUserId);
+            FundTransaction entity = fundTransactionService.createPurchaseTransaction(dto);
 
-        FundTransactionVO vo = new FundTransactionVO();
-        BeanUtils.copyProperties(entity, vo);
-        return ResponseEntity.ok(vo);
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("申购成功", vo));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponseVO.error("申购失败: " + e.getMessage()));
+        }
     }
 
     @Operation(summary = "赎回基金")
     @PostMapping("/redeem")
-    public ResponseEntity<FundTransactionVO> redeem(@RequestBody @Validated FundRedeemDTO dto, Principal principal) {
-        Long currentUserId = Long.parseLong(principal.getName());
-        dto.setUserId(currentUserId);
-        FundTransaction entity = fundTransactionService.createRedeemTransaction(dto);
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> redeem(@RequestBody @Validated FundRedeemDTO dto, Principal principal) {
+        try {
+            Long currentUserId = Long.parseLong(principal.getName());
+            dto.setUserId(currentUserId);
+            FundTransaction entity = fundTransactionService.createRedeemTransaction(dto);
 
-        FundTransactionVO vo = new FundTransactionVO();
-        BeanUtils.copyProperties(entity, vo);
-        return ResponseEntity.ok(vo);
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("赎回成功", vo));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponseVO.error("赎回失败: " + e.getMessage()));
+        }
     }
 
     @Operation(summary = "查询【当前登录用户】的所有交易记录")
     @GetMapping("/my-transactions")
-    public ResponseEntity<List<FundTransactionVO>> getMyTransactions(Principal principal) {
+    public ResponseEntity<ApiResponseVO<List<FundTransactionVO>>> getMyTransactions(Principal principal) {
         Long currentUserId = Long.parseLong(principal.getName());
         List<FundTransaction> transactionEntities = fundTransactionService.listByUserId(currentUserId);
 
@@ -62,17 +73,23 @@ public class FundTransactionController {
             return vo;
         }).collect(Collectors.toList());
 
-        return ResponseEntity.ok(transactionVOs);
+        return ResponseEntity.ok(ApiResponseVO.success("交易记录获取成功", transactionVOs));
     }
 
     @Operation(summary = "根据交易ID查询【当前用户】的单条交易详情")
     @GetMapping("/{id}")
-    public ResponseEntity<FundTransactionVO> getById(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> getById(@PathVariable Long id, Principal principal) {
         Long currentUserId = Long.parseLong(principal.getName());
-        FundTransaction entity = fundTransactionService.getTransactionByIdAndUserId(id, currentUserId);
+        try {
+            FundTransaction entity = fundTransactionService.getTransactionByIdAndUserId(id, currentUserId);
 
-        FundTransactionVO vo = new FundTransactionVO();
-        BeanUtils.copyProperties(entity, vo);
-        return ResponseEntity.ok(vo);
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("交易详情获取成功", vo));
+        } catch (Exception e) {
+            // Service层在找不到或无权访问时会抛出异常
+            return ResponseEntity.status(403).body(ApiResponseVO.error(e.getMessage()));
+        }
     }
 }

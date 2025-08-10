@@ -1,8 +1,8 @@
 package com.whu.nanyin.controller;
 
-import com.whu.nanyin.pojo.dto.LoginDTO; // 注意：这个LoginDTO我们下一步创建
-import com.whu.nanyin.pojo.dto.RegisterDTO; // 注意：这个RegisterDTO我们下一步创建
-import com.whu.nanyin.service.AuthService; // 注意：这个AuthService我们下一步创建
+import com.whu.nanyin.pojo.dto.LoginDTO;
+import com.whu.nanyin.pojo.dto.RegisterDTO;
+import com.whu.nanyin.service.AuthService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +26,10 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Validated @RequestBody RegisterDTO registerDTO) {
         try {
             authService.register(registerDTO);
-            // 【修改】将返回的字符串包装在一个Map中
+            // 将返回的字符串包装在一个Map中
             return ResponseEntity.ok(Map.of("message", "用户注册成功！"));
         } catch (Exception e) {
-            // 【修改】同样，也将错误信息包装在Map中，保持格式统一
+            // 将错误信息包装在Map中，保持格式统一
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
