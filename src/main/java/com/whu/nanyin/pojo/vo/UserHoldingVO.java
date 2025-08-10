@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Schema(description = "客户持仓视图对象")
-public class CustomerHoldingVO {
+public class UserHoldingVO {
 
     // --- 核心持仓信息 ---
     @Schema(description = "持仓记录ID")
@@ -27,7 +27,7 @@ public class CustomerHoldingVO {
 
     // --- 关联的客户信息 ---
     @Schema(description = "客户ID")
-    private Long customerId;
+    private Long userId;
 
     @Schema(description = "客户姓名")
     private String customerName;

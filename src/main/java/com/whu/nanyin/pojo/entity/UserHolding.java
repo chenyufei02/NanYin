@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("user_transactions")
-public class FundTransaction {
+@TableName("user_holdings")
+public class UserHolding {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -15,12 +15,10 @@ public class FundTransaction {
     private Long userId;
 
     private String fundCode;
-    private String transactionType;
-    private BigDecimal transactionAmount;
-    private BigDecimal transactionShares;
-    private BigDecimal sharePrice;
-    private LocalDateTime transactionTime;
-    private String status;
+    private BigDecimal totalShares;
+    private BigDecimal marketValue;
+    private BigDecimal averageCost;
+    private LocalDateTime lastUpdateDate;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

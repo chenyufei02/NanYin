@@ -11,11 +11,13 @@ import java.time.LocalDate;
  * 对应展示客户详细信息的基础信息表
  */
 @Data // Lombok 自动生成getter/setter/toString等方法
-@TableName("customer") // 指定对应数据库表名
-public class Customer {
+@TableName("user_profiles") // 指定对应数据库表名
+public class UserProfile {
 
     @TableId(type = IdType.AUTO)
     private Long id;                  // 主键ID，自增
+
+    private Long userId;
 
     private String name;              // 姓名
 

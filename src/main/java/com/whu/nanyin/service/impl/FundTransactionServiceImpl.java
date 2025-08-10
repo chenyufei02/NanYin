@@ -1,32 +1,25 @@
 package com.whu.nanyin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.whu.nanyin.exception.InsufficientFundsException;
 import com.whu.nanyin.mapper.FundTransactionMapper;
 import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
 import com.whu.nanyin.pojo.dto.FundRedeemDTO;
-import com.whu.nanyin.pojo.entity.Customer;
-import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundTransaction;
-import com.whu.nanyin.pojo.vo.FundTransactionVO;
 import com.whu.nanyin.service.*;
 import com.whu.nanyin.pojo.entity.FundInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.springframework.util.StringUtils;
 
 /**
  * 基金交易服务实现类
@@ -37,9 +30,6 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
 
 
     @Autowired
-    private CustomerService customerService;
-
-    @Autowired
     private FundInfoService fundInfoService;
 
     /**
@@ -47,7 +37,7 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
      */
     @Autowired
     @Lazy
-    private CustomerHoldingService customerHoldingService;
+    private UserHoldingService userHoldingService;
 
     /**
      * 在一个事务内处理基金申购业务 和 更新客户持仓数据
@@ -96,10 +86,10 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     public FundTransaction createRedeemTransaction(FundRedeemDTO dto) {
 
         // a. 查询客户对该基金的当前持仓
-        QueryWrapper<CustomerHolding> holdingQuery = new QueryWrapper<>();
-        holdingQuery.eq("customer_id", dto.getCustomerId())
+        QueryWrapper<UserHolding> holdingQuery = new QueryWrapper<>();
+        holdingQuery.eq("user_id", dto.getUserId())
                     .eq("fund_code", dto.getFundCode());
-        CustomerHolding currentHolding = customerHoldingService.getOne(holdingQuery);
+        UserHolding currentHolding = userHoldingService.getOne(holdingQuery);
 
         // b. 进行校验
         if (currentHolding == null || dto.getTransactionShares().compareTo(currentHolding.getTotalShares()) > 0) {
@@ -131,6 +121,12 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
         return saveTransactionAndUpdateHolding(transaction);
     }
 
+    public List<FundTransaction> listByUserId(Long userId) {
+        QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.orderByDesc("transaction_time"); // 按交易时间降序
+        return this.list(queryWrapper);
+    }
 
     /**
      * 私有辅助方法，用于统一处理保存交易和更新持仓的逻辑
@@ -141,7 +137,7 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
         // 步骤1：将交易记录保存到数据库
         this.save(transaction);
         // 步骤2：调用客户持仓服务，根据这笔新交易实时更新持仓信息
-        customerHoldingService.updateHoldingAfterNewTransaction(transaction);
+        userHoldingService.updateHoldingAfterNewTransaction(transaction);
 
 
         // 步骤3：返回包含ID的完整交易实体
@@ -149,109 +145,19 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     }
 
 
-    /**
-     * 分页查询
-     * @param page customerName, fundCode, transactionType]
-     * @return com.baomidou.mybatisplus.extension.plugins.pagination.Page<com.whu.nanyin.pojo.vo.FundTransactionVO>
-     * @author yufei
-     * @since 2025/7/9
-     */
+    // 【新增】实现安全获取方法
     @Override
-    @Transactional(readOnly = true)
-    public Page<FundTransactionVO> getTransactionPage(
-            Page<FundTransactionVO> page, String customerName,
-            String fundCode, String transactionType, String sortField,
-            String sortOrder)
-    {
-        // 步骤 1: 根据客户姓名查询匹配的客户ID
-        List<Long> customerIds = null;
-        if (StringUtils.hasText(customerName)) {
-            customerIds = customerService.lambdaQuery()
-                    .like(Customer::getName, customerName)
-                    .list().stream()
-                    .map(Customer::getId)
-                    .collect(Collectors.toList());
-            if (customerIds.isEmpty()) {
-                return page.setRecords(Collections.emptyList());
-            }
+    public FundTransaction getTransactionByIdAndUserId(Long transactionId, Long userId) {
+        FundTransaction transaction = this.getById(transactionId);
+
+        // 安全校验：如果交易不存在，或者交易的userId与当前登录的userId不匹配
+        if (transaction == null || !transaction.getUserId().equals(userId)) {
+            // 抛出异常，Spring Security会捕获并返回403 Forbidden错误
+            throw new AccessDeniedException("无权访问此交易记录");
         }
 
-        // 步骤 2: 构建对交易表的分页查询
-        QueryWrapper<FundTransaction> transactionQueryWrapper = new QueryWrapper<>();
-        if (customerIds != null) {
-            transactionQueryWrapper.in("customer_id", customerIds);
-        }
-        if (StringUtils.hasText(fundCode)) {
-            transactionQueryWrapper.like("fund_code", fundCode);
-        }
-        if (StringUtils.hasText(transactionType)) {
-            transactionQueryWrapper.eq("transaction_type", transactionType);
-        }
-
-        // 【 排序逻辑 】
-        if (StringUtils.hasText(sortField) && StringUtils.hasText(sortOrder)) {
-            String dbColumn;
-            // 手动将前端传来的驼峰字段名，转换为数据库的下划线列名
-            switch (sortField) {
-                case "customerId":
-                    dbColumn = "customer_id";
-                    break;
-                case "transactionAmount":
-                    dbColumn = "transaction_amount";
-                    break;
-                default:
-                    dbColumn = "transaction_time";
-                    sortOrder = "desc";
-            }
-
-            if ("asc".equalsIgnoreCase(sortOrder)) {
-                transactionQueryWrapper.orderByAsc(dbColumn);
-            } else {
-                transactionQueryWrapper.orderByDesc(dbColumn);
-            }
-        } else {
-            // 默认排序
-            transactionQueryWrapper.orderByDesc("transaction_time");
-        }
-
-        Page<FundTransaction> transactionPage = new Page<>(page.getCurrent(), page.getSize());
-        this.page(transactionPage, transactionQueryWrapper);  // 根据查询规则 返回指定页面 以及总记录数和总页数
-
-        List<FundTransaction> transactionRecords = transactionPage.getRecords();  // 页面里的信息放到列表供进一步操作
-
-        if (transactionRecords.isEmpty()) { return page.setRecords(Collections.emptyList()); }
-
-        // 步骤 3: 批量获取关联的客户和基金信息
-            // 根据模糊匹配名字得到的数据找不重复的客户和基金ID
-        List<Long> resultCustomerIds = transactionRecords.stream().map(FundTransaction::getCustomerId).distinct().collect(Collectors.toList());
-        List<String> resultFundCodes = transactionRecords.stream().map(FundTransaction::getFundCode).distinct().collect(Collectors.toList());
-            // 将不重复的客户和基金ID映射到姓名 供后续返回VO对象的时候好根据ID找到姓名
-        Map<Long, String> customerIdToNameMap = customerService.listByIds(resultCustomerIds).stream()
-                .collect(Collectors.toMap(Customer::getId, Customer::getName));
-        Map<String, String> fundCodeToNameMap = fundInfoService.listByIds(resultFundCodes).stream()
-                .collect(Collectors.toMap(FundInfo::getFundCode, FundInfo::getFundName));
-
-        // 步骤 4: 组装最终的 FundTransactionVO 列表
-        List<FundTransactionVO> voRecords = transactionRecords.stream().map(transactionrecords -> {
-
-            FundTransactionVO vo = new FundTransactionVO();
-
-            // 复制所有交易信息
-            BeanUtils.copyProperties(transactionrecords, vo);   // 将已经找到的交易页的信息（转换存进了transactionRecords列表对象） 全部拷贝到VO对象
-
-            // 然后再向VO对象里填充关联的名称信息
-            vo.setCustomerName(customerIdToNameMap.get(transactionrecords.getCustomerId()));
-            vo.setFundName(fundCodeToNameMap.get(transactionrecords.getFundCode()));
-            return vo;
-        }).collect(Collectors.toList());  //
-
-        // 步骤 5: 设置分页结果并返回
-        page.setRecords(voRecords);
-        page.setTotal(transactionPage.getTotal());
-        return page;
+        return transaction;
     }
-
-
 
 
 

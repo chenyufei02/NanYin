@@ -1,45 +1,54 @@
 package com.whu.nanyin.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO; // 1. 导入新的DTO
+import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
 import com.whu.nanyin.pojo.entity.RiskAssessment;
+import com.whu.nanyin.pojo.vo.RiskAssessmentVO;
 import com.whu.nanyin.service.RiskAssessmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/risk-assessment")
-@Tag(name = "客户风险评估管理", description = "提供客户风险评估的记录和查询接口")
+@Tag(name = "个人风险评估", description = "提供个人风险评估的提交与查询接口")
 public class RiskAssessmentController {
 
     @Autowired
     private RiskAssessmentService riskAssessmentService;
 
-// ======== 【因为提供了模拟数据一键自动化生成的方法，此处未直接提供前端实现】 =========
-    @Operation(summary = "新增一条客户风险评估记录")
-    @PostMapping("/add")
-    public RiskAssessment addAssessment(@RequestBody @Validated RiskAssessmentSubmitDTO dto) {
-        // 调用 Service 层中的 createAssessment 方法根据分数dto计算风险等级并封装进RiskAssessment对象进行创建
-        return riskAssessmentService.createAssessment(dto);
+    @Operation(summary = "提交一条新的风险评估记录")
+    @PostMapping("/submit")
+    public ResponseEntity<RiskAssessmentVO> submitAssessment(@RequestBody @Validated RiskAssessmentSubmitDTO dto, Principal principal) {
+        Long currentUserId = Long.parseLong(principal.getName());
+        dto.setUserId(currentUserId);
+        RiskAssessment entity = riskAssessmentService.createAssessment(dto);
+
+        RiskAssessmentVO vo = new RiskAssessmentVO();
+        BeanUtils.copyProperties(entity, vo);
+        return ResponseEntity.ok(vo);
     }
 
+    @Operation(summary = "查询【当前登录用户】的所有风险评估记录")
+    @GetMapping("/my-assessments")
+    public ResponseEntity<List<RiskAssessmentVO>> getMyAssessments(Principal principal) {
+        Long currentUserId = Long.parseLong(principal.getName());
+        List<RiskAssessment> assessmentEntities = riskAssessmentService.listByUserId(currentUserId);
 
-    @Operation(summary = "根据客户ID查询其所有风险评估记录")
-    @GetMapping("/customer/{customerId}")
-    public List<RiskAssessment> listByCustomerId(@PathVariable Long customerId) {
-        QueryWrapper<RiskAssessment> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id", customerId);
-        queryWrapper.orderByDesc("assessment_date");
-        return riskAssessmentService.list(queryWrapper);
-    }
+        List<RiskAssessmentVO> assessmentVOs = assessmentEntities.stream().map(entity -> {
+            RiskAssessmentVO vo = new RiskAssessmentVO();
+            BeanUtils.copyProperties(entity, vo);
+            // 注意：这里未来可能需要关联查询客户姓名(customerName)等
+            return vo;
+        }).collect(Collectors.toList());
 
-    @Operation(summary = "根据主键ID删除评估记录")
-    @DeleteMapping("/delete/{id}")
-    public boolean deleteAssessment(@PathVariable Long id) {
-        return riskAssessmentService.removeById(id);
+        return ResponseEntity.ok(assessmentVOs);
     }
 }

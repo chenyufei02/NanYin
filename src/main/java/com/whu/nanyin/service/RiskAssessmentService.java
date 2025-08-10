@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
 import com.whu.nanyin.pojo.entity.RiskAssessment;
 
+import java.util.List;
+
 
 public interface RiskAssessmentService extends IService<RiskAssessment> {
 
@@ -15,6 +17,8 @@ public interface RiskAssessmentService extends IService<RiskAssessment> {
      * @return 创建好的、完整的风险评估实体
      */
     RiskAssessment createAssessment(RiskAssessmentSubmitDTO dto);
+
+    List<RiskAssessment> listByUserId(Long userId);
 
 
 }

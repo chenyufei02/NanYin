@@ -1,0 +1,41 @@
+package com.whu.nanyin.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.whu.nanyin.mapper.UserMapper; // 注意：这个UserMapper我们下一步创建
+import com.whu.nanyin.pojo.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+
+@Service
+public class UserAuthService implements UserDetailsService {
+
+    @Autowired
+    private UserMapper userMapper; // 我们需要一个UserMapper来查询数据库
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 1. 根据用户名，从数据库的 "users" 表中查询用户信息
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
+        User user = userMapper.selectOne(queryWrapper);
+
+        // 2. 如果查询不到用户，必须抛出此异常，Spring Security会捕获并处理
+        if (user == null) {
+            throw new UsernameNotFoundException("用户 '" + username + "' 不存在");
+        }
+
+        // 3. 如果查询到了用户，将其封装成 Spring Security 可识别的 UserDetails 对象返回
+        //    - user.getUsername(): 用户的账号
+        //    - user.getPassword(): 用户在数据库中已加密的密码
+        //    - new ArrayList<>(): 用户的权限列表（我们暂时留空）
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                new ArrayList<>()
+        );
+    }
+}

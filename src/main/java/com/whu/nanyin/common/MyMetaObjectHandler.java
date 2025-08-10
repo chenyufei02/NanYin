@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 //123456
+// http://localhost:8080/v3/api-docs   APIFOX里导入API文档进行测试
+// http://localhost:8080/swagger-ui/index.html  查看后端API文档
 
 @Component // 一定要加
 public class MyMetaObjectHandler implements MetaObjectHandler {

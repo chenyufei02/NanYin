@@ -13,7 +13,7 @@ public class RiskAssessmentSubmitDTO {
 
     @NotNull(message = "客户ID不能为空")
     @Schema(description = "客户ID", example = "1")
-    private Long customerId;
+    private Long userId;
 
     @NotNull(message = "风险评估得分不能为空")
     @Min(value = 0, message = "分数不能低于0")

@@ -1,7 +1,7 @@
 package com.whu.nanyin.service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,7 +27,7 @@ public class ScheduledTasksService {
     @Autowired
     private FundInfoService fundInfoService;
     @Autowired
-    private CustomerHoldingService customerHoldingService;
+    private UserHoldingService userHoldingService;
 
     // 注入事务写入服务
     @Autowired
@@ -94,7 +94,7 @@ public class ScheduledTasksService {
      * 阶段二：手动创建线程池，并发计算并写入持仓市值
      */
     private void updateMarketValuesConcurrently() {
-        List<CustomerHolding> allHoldings = customerHoldingService.list();
+        List<UserHolding> allHoldings = userHoldingService.list();
         if (allHoldings.isEmpty()) {
             System.out.println("【定时任务-阶段2】没有任何持仓记录，市值更新结束。");
             return;
@@ -126,23 +126,23 @@ public class ScheduledTasksService {
         List<Future<Void>> writerFutures = new ArrayList<>();
 
         // 按客户ID对所有持仓进行分组，为每个客户创建一个写入任务
-        Map<Long, List<CustomerHolding>> holdingsByCustomer = allHoldings.stream()
-                .collect(Collectors.groupingBy(CustomerHolding::getCustomerId));
+        Map<Long, List<UserHolding>> holdingsByCustomer = allHoldings.stream()
+                .collect(Collectors.groupingBy(UserHolding::getUserId));
 
         System.out.println("【定时任务-阶段2】开始向写入线程池提交 " + holdingsByCustomer.size() + " 个客户的市值并发更新任务...");
 
-        for (Map.Entry<Long, List<CustomerHolding>> entry : holdingsByCustomer.entrySet()) {
-            List<CustomerHolding> customerHoldings = entry.getValue();
+        for (Map.Entry<Long, List<UserHolding>> entry : holdingsByCustomer.entrySet()) {
+            List<UserHolding> userHoldings = entry.getValue();
 
             // 为每个客户创建一个独立的、可被调用的写入任务
             Callable<Void> writeTask = () -> {
                 // a. 在子线程内部，先计算出这个客户所有需要更新的持仓对象
-                List<CustomerHolding> updatedHoldingsForCustomer = customerHoldings.stream().map(holding -> {
+                List<UserHolding> updatedHoldingsForCustomer = userHoldings.stream().map(holding -> {
                     BigDecimal latestNetValue = latestPrices.get(holding.getFundCode());
                     if (latestNetValue != null && holding.getTotalShares() != null) {
                         BigDecimal newMarketValue = holding.getTotalShares().multiply(latestNetValue)
                                 .setScale(2, RoundingMode.HALF_UP);
-                        CustomerHolding holdingForUpdate = new CustomerHolding();
+                        UserHolding holdingForUpdate = new UserHolding();
                         holdingForUpdate.setId(holding.getId());
                       holdingForUpdate.setMarketValue(newMarketValue);
                         return holdingForUpdate;

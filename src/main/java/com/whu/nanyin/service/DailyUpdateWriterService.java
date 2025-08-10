@@ -1,6 +1,6 @@
 package com.whu.nanyin.service;
 
-import com.whu.nanyin.pojo.entity.CustomerHolding;
+import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DeadlockLoserDataAccessException;
@@ -23,7 +23,7 @@ public class DailyUpdateWriterService {
     private FundInfoService fundInfoService;
 
     @Autowired
-    private CustomerHoldingService customerHoldingService;
+    private UserHoldingService userHoldingService;
 
     /**
      * 在独立的、可重试的事务中，批量更新基金净值。
@@ -51,10 +51,10 @@ public class DailyUpdateWriterService {
         maxAttempts = 3,
         backoff = @Backoff(delay = 100, multiplier = 2)
     )
-    public void saveUpdatedHoldingsInTransaction(List<CustomerHolding> updatedHoldings) {
+    public void saveUpdatedHoldingsInTransaction(List<UserHolding> updatedHoldings) {
         if (updatedHoldings != null && !updatedHoldings.isEmpty()) {
             // 分批次更新，避免单次SQL过长
-            customerHoldingService.updateBatchById(updatedHoldings, 1000);
+            userHoldingService.updateBatchById(updatedHoldings, 1000);
         }
     }
 }

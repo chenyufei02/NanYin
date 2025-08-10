@@ -12,15 +12,13 @@ import java.time.LocalDateTime;
 @Schema(description = "基金赎回请求对象")
 public class FundRedeemDTO {
 
-    @NotNull(message = "客户ID不能为空")
-    @Schema(description = "客户ID", example = "1")
-    private Long customerId;
+    @Schema(description = "用户ID", example = "1")
+    private Long userId;
 
     @NotBlank(message = "基金代码不能为空")
     @Schema(description = "基金代码", example = "000001")
     private String fundCode;
 
-    // 这里只保留了交易份额，完全移除了交易金额字段
     @NotNull(message = "赎回份额不能为空")
     @Positive(message = "赎回份额必须为正数")
     @Schema(description = "赎回份额", example = "500.00")

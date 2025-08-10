@@ -1,5 +1,6 @@
 package com.whu.nanyin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.whu.nanyin.enums.RiskLevelEnum;
 import com.whu.nanyin.mapper.RiskAssessmentMapper;
@@ -7,6 +8,8 @@ import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
 import com.whu.nanyin.pojo.entity.RiskAssessment;
 import com.whu.nanyin.service.RiskAssessmentService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -21,7 +24,7 @@ public class RiskAssessmentServiceImpl extends ServiceImpl<RiskAssessmentMapper,
 
         // 3. 创建一个完整的、即将存入数据库的实体对象
         RiskAssessment assessment = new RiskAssessment();
-        assessment.setCustomerId(dto.getCustomerId());
+        assessment.setUserId(dto.getUserId());
         assessment.setAssessmentDate(dto.getAssessmentDate());
         assessment.setRiskScore(dto.getScore());
         // 4. 从枚举实例中获取规范的等级名称并设置
@@ -32,6 +35,14 @@ public class RiskAssessmentServiceImpl extends ServiceImpl<RiskAssessmentMapper,
 
         // 6. 返回保存好的实体（它现在已经包含了数据库生成的ID）
         return assessment;
+    }
+
+    public List<RiskAssessment> listByUserId(Long userId) {
+        QueryWrapper<RiskAssessment> queryWrapper = new QueryWrapper<>();
+        // 【核心修改】确保查询的是正确的 user_id 列
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.orderByDesc("assessment_date"); // 按评估日期降序
+        return this.list(queryWrapper);
     }
 
 }

@@ -2,21 +2,18 @@ package com.whu.nanyin.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("user_risk_assessments")
-public class RiskAssessment {
+@TableName("users") // 明确指定这个类对应数据库中的 "users" 表
+public class User {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long userId;
+    private String username;
 
-    private Integer riskScore;
-    private String riskLevel;
-    private LocalDate assessmentDate;
+    private String password;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
