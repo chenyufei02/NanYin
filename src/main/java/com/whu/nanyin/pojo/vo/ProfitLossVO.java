@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public class ProfitLossVO {
 
     @Schema(description = "客户ID")
-    private Long customerId;
+    private Long userId;
 
     @Schema(description = "客户姓名")
     private String customerName;

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Schema(description = "客户信息响应对象")
-public class CustomerVO {
+public class UserProfileVO {
 
     @Schema(description = "主键ID")
     private Long id;

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whu.nanyin.mapper.UserProfileMapper">
+
+    <select id="getProfitLossVOByUserId" resultType="com.whu.nanyin.pojo.vo.ProfitLossVO">
+        SELECT
+            p.user_id as userId,
+            p.name as customerName,
+            IFNULL(inv.total_investment, 0) as totalInvestment,
+            IFNULL(mv.total_market_value, 0) as totalMarketValue,
+            (IFNULL(mv.total_market_value, 0) - IFNULL(inv.total_investment, 0)) as totalProfitLoss,
+            IF(IFNULL(inv.total_investment, 0) > 0, ((IFNULL(mv.total_market_value, 0) - IFNULL(inv.total_investment, 0)) / inv.total_investment) * 100, 0) as profitLossRate
+        FROM
+            user_profiles p
+        LEFT JOIN (
+            SELECT
+                user_id,
+                SUM(CASE WHEN transaction_type = '申购' THEN transaction_amount ELSE -transaction_amount END) as total_investment
+            FROM user_transactions
+            WHERE user_id = #{userId}
+            GROUP BY user_id
+        ) inv ON p.user_id = inv.user_id
+        LEFT JOIN (
+            SELECT
+                user_id,
+                SUM(market_value) as total_market_value
+            FROM user_holdings
+            WHERE user_id = #{userId}
+            GROUP BY user_id
+        ) mv ON p.user_id = mv.user_id
+        WHERE p.user_id = #{userId}
+    </select>
+
+</mapper>
