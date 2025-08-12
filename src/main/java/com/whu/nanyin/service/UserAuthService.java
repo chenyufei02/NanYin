@@ -3,12 +3,12 @@ package com.whu.nanyin.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.whu.nanyin.mapper.UserMapper; // 注意：这个UserMapper我们下一步创建
 import com.whu.nanyin.pojo.entity.User;
+import com.whu.nanyin.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 
 @Service
 public class UserAuthService implements UserDetailsService {
@@ -32,10 +32,6 @@ public class UserAuthService implements UserDetailsService {
         //    - user.getUsername(): 用户的账号
         //    - user.getPassword(): 用户在数据库中已加密的密码
         //    - new ArrayList<>(): 用户的权限列表（我们暂时留空）
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                new ArrayList<>()
-        );
+        return new CustomUserDetails(user);
     }
 }

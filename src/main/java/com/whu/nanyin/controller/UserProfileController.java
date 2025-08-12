@@ -9,6 +9,7 @@ import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.UserProfile;
 import com.whu.nanyin.pojo.vo.UserDashboardVO;
 import com.whu.nanyin.pojo.vo.UserProfileVO;
+import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.FundInfoService;
 import com.whu.nanyin.service.FundTransactionService;
 import com.whu.nanyin.service.UserHoldingService;
@@ -18,10 +19,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -51,16 +52,18 @@ public class UserProfileController {
 
     /**
      * 获取当前登录用户的基本个人资料。
-     * @param principal Spring Security提供的对象，用于获取当前登录用户的信息。
+     * @param authentication Spring Security提供的对象，用于获取当前登录用户的信息。
      * @return 包含用户个人资料VO的ResponseEntity。
      */
     @GetMapping("/profile")
     @Operation(summary = "获取当前登录用户的个人资料")
-    public ResponseEntity<UserProfileVO> getMyProfile(Principal principal) {
-        if (principal == null) {
+    public ResponseEntity<UserProfileVO> getMyProfile(Authentication authentication) {
+        if (authentication == null) {
             return ResponseEntity.status(401).build(); // 用户未登录，返回401状态码
         }
-        Long currentUserId = Long.parseLong(principal.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
+
         UserProfile userProfileEntity = userProfileService.getUserProfileByUserId(currentUserId);
 
         if (userProfileEntity == null) {
@@ -77,16 +80,17 @@ public class UserProfileController {
     /**
      * 更新当前登录用户的个人资料。
      * @param dto 包含待更新字段的数据传输对象。
-     * @param principal Spring Security提供的对象，用于获取当前登录用户的信息。
+     * @param authentication Spring Security提供的对象，用于获取当前登录用户的信息。
      * @return 包含更新后用户个人资料VO的ResponseEntity。
      */
     @PutMapping("/profile")
     @Operation(summary = "更新当前登录用户的个人资料")
-    public ResponseEntity<UserProfileVO> updateUserProfile(@RequestBody @Validated UserProfileUpdateDTO dto, Principal principal) {
-        if (principal == null) {
+    public ResponseEntity<UserProfileVO> updateUserProfile(@RequestBody @Validated UserProfileUpdateDTO dto, Authentication authentication) {
+        if (authentication == null) {
             return ResponseEntity.status(401).build(); // 用户未登录
         }
-        Long currentUserId = Long.parseLong(principal.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
 
         try {
             UserProfile updatedProfileEntity = userProfileService.updateUserProfile(currentUserId, dto);
@@ -101,16 +105,18 @@ public class UserProfileController {
     /**
      * 【聚合接口】获取构建“我的主页/仪表盘”所需的全部数据。
      * 这是一个高效的接口，前端只需调用一次即可获取渲染整个页面所需的所有信息。
-     * @param principal Spring Security提供的对象，用于获取当前登录用户的信息。
+     * @param authentication Spring Security提供的对象，用于获取当前登录用户的信息。
      * @return 包含所有主页数据的UserDashboardVO的ResponseEntity。
      */
     @GetMapping("/dashboard")
     @Operation(summary = "获取当前登录用户的主页仪表盘所有数据")
-    public ResponseEntity<UserDashboardVO> getMyDashboard(Principal principal) {
-        if (principal == null) {
+    public ResponseEntity<UserDashboardVO> getMyDashboard(Authentication authentication) {
+        if (authentication == null) {
             return ResponseEntity.status(401).build();
         }
-        Long currentUserId = Long.parseLong(principal.getName());
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
 
         try {
             UserDashboardVO dashboardVO = new UserDashboardVO();

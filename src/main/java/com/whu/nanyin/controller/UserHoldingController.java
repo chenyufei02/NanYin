@@ -3,17 +3,17 @@ package com.whu.nanyin.controller;
 import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.vo.ApiResponseVO; // <-- 【新增】导入ApiResponseVO
 import com.whu.nanyin.pojo.vo.UserHoldingVO;
+import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.UserHoldingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,11 +28,12 @@ public class UserHoldingController {
     @Operation(summary = "查询【当前登录用户】的所有持仓信息")
     @GetMapping("/my-holdings")
     // 将返回类型用 ApiResponseVO 包装起来
-    public ResponseEntity<ApiResponseVO<List<UserHoldingVO>>> getMyHoldings(Principal principal) {
-        if (principal == null) {
+    public ResponseEntity<ApiResponseVO<List<UserHoldingVO>>> getMyHoldings(Authentication authentication) {
+        if (authentication == null) {
             return ResponseEntity.status(401).body(ApiResponseVO.error("用户未登录"));
         }
-        Long currentUserId = Long.parseLong(principal.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
 
         List<UserHolding> holdingEntities = userHoldingService.listByuserId(currentUserId);
 

@@ -4,14 +4,14 @@ import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundInfo;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.ProfitLossVO;
+import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,12 +31,13 @@ public class AIController {
 
     @PostMapping("/suggestion")
     @Operation(summary = "为【当前登录用户】生成投资建议")
-    public ApiResponseVO<String> generateSuggestionForCurrentUser(Principal principal) {
-        if (principal == null) {
+    public ApiResponseVO<String> generateSuggestionForCurrentUser(Authentication authentication) {
+        if (authentication == null) {
             return ApiResponseVO.error("用户未登录，无法生成建议。");
         }
 
-        Long currentUserId = Long.parseLong(principal.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
 
         try {
             // 1. 获取AI建议所需的核心数据

@@ -5,16 +5,16 @@ import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.FundTransaction;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.FundTransactionVO;
+import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.FundTransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,9 +28,10 @@ public class FundTransactionController {
 
     @Operation(summary = "申购基金")
     @PostMapping("/purchase")
-    public ResponseEntity<ApiResponseVO<FundTransactionVO>> purchase(@RequestBody @Validated FundPurchaseDTO dto, Principal principal) {
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> purchase(@RequestBody @Validated FundPurchaseDTO dto, Authentication authentication) {
         try {
-            Long currentUserId = Long.parseLong(principal.getName());
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long currentUserId = userDetails.getId();
             dto.setUserId(currentUserId);
             FundTransaction entity = fundTransactionService.createPurchaseTransaction(dto);
 
@@ -45,9 +46,10 @@ public class FundTransactionController {
 
     @Operation(summary = "赎回基金")
     @PostMapping("/redeem")
-    public ResponseEntity<ApiResponseVO<FundTransactionVO>> redeem(@RequestBody @Validated FundRedeemDTO dto, Principal principal) {
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> redeem(@RequestBody @Validated FundRedeemDTO dto, Authentication authentication) {
         try {
-            Long currentUserId = Long.parseLong(principal.getName());
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long currentUserId = userDetails.getId();
             dto.setUserId(currentUserId);
             FundTransaction entity = fundTransactionService.createRedeemTransaction(dto);
 
@@ -62,8 +64,9 @@ public class FundTransactionController {
 
     @Operation(summary = "查询【当前登录用户】的所有交易记录")
     @GetMapping("/my-transactions")
-    public ResponseEntity<ApiResponseVO<List<FundTransactionVO>>> getMyTransactions(Principal principal) {
-        Long currentUserId = Long.parseLong(principal.getName());
+    public ResponseEntity<ApiResponseVO<List<FundTransactionVO>>> getMyTransactions(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
         List<FundTransaction> transactionEntities = fundTransactionService.listByUserId(currentUserId);
 
         List<FundTransactionVO> transactionVOs = transactionEntities.stream().map(entity -> {
@@ -78,8 +81,9 @@ public class FundTransactionController {
 
     @Operation(summary = "根据交易ID查询【当前用户】的单条交易详情")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseVO<FundTransactionVO>> getById(@PathVariable Long id, Principal principal) {
-        Long currentUserId = Long.parseLong(principal.getName());
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> getById(@PathVariable Long id, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
         try {
             FundTransaction entity = fundTransactionService.getTransactionByIdAndUserId(id, currentUserId);
 

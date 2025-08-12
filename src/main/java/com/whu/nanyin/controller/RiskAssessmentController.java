@@ -4,15 +4,16 @@ import com.whu.nanyin.pojo.dto.RiskAssessmentSubmitDTO;
 import com.whu.nanyin.pojo.entity.RiskAssessment;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.RiskAssessmentVO;
+import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.RiskAssessmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,9 +27,10 @@ public class RiskAssessmentController {
 
     @Operation(summary = "提交一条新的风险评估记录")
     @PostMapping("/submit")
-    public ResponseEntity<ApiResponseVO<RiskAssessmentVO>> submitAssessment(@RequestBody @Validated RiskAssessmentSubmitDTO dto, Principal principal) {
+    public ResponseEntity<ApiResponseVO<RiskAssessmentVO>> submitAssessment(@RequestBody @Validated RiskAssessmentSubmitDTO dto, Authentication authentication) {
         try {
-            Long currentUserId = Long.parseLong(principal.getName());
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long currentUserId = userDetails.getId();
             dto.setUserId(currentUserId);
             RiskAssessment entity = riskAssessmentService.createAssessment(dto);
 
@@ -43,8 +45,9 @@ public class RiskAssessmentController {
 
     @Operation(summary = "查询【当前登录用户】的所有风险评估记录")
     @GetMapping("/my-assessments")
-    public ResponseEntity<ApiResponseVO<List<RiskAssessmentVO>>> getMyAssessments(Principal principal) {
-        Long currentUserId = Long.parseLong(principal.getName());
+    public ResponseEntity<ApiResponseVO<List<RiskAssessmentVO>>> getMyAssessments(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
         List<RiskAssessment> assessmentEntities = riskAssessmentService.listByUserId(currentUserId);
 
         List<RiskAssessmentVO> assessmentVOs = assessmentEntities.stream().map(entity -> {
