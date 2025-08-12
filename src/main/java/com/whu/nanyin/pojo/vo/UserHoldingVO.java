@@ -30,7 +30,7 @@ public class UserHoldingVO {
     private Long userId;
 
     @Schema(description = "客户姓名")
-    private String customerName;
+    private String userName;
 
     // --- 关联的基金信息 ---
     @Schema(description = "基金代码")

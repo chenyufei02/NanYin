@@ -12,7 +12,7 @@ public class ProfitLossVO {
     private Long userId;
 
     @Schema(description = "客户姓名")
-    private String customerName;
+    private String userName;
 
     @Schema(description = "累计投资总额")
     private BigDecimal totalInvestment;
