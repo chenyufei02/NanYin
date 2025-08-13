@@ -18,6 +18,9 @@
         ON
             p.fund_code = latest_p.fund_code AND p.end_date = latest_p.max_date
         <where>
+            <if test="true">
+                AND p.unit_net_value IS NOT NULL AND p.unit_net_value > 0
+            </if>
             <if test="fundName != null and fundName != ''">
                 AND (b.fund_name LIKE CONCAT('%', #{fundName}, '%') OR b.abbreviation LIKE CONCAT('%', #{fundName}, '%'))
             </if>
@@ -25,7 +28,7 @@
                 AND b.fund_code LIKE CONCAT('%', #{fundCode}, '%')
             </if>
             <if test="fundType != null and fundType != ''">
-                AND b.fund_invest_type = #{fundType}
+                 AND b.fund_invest_type = #{fundType}
             </if>
         </where>
         ORDER BY b.fund_code ASC

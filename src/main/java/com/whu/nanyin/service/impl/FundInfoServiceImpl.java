@@ -41,12 +41,9 @@ public class FundInfoServiceImpl implements FundInfoService {
 
         // 约定前端会将搜索框的内容统一放在 fundName 这个参数里传过来
         if (StringUtils.hasText(fundName)) {
-            // .and()确保这组 OR 条件是一个整体
-            queryWrapper.and(wrapper -> wrapper
-                .like("fund_name", fundName)       // 模糊匹配基金名称
-                .or().like("abbreviation", fundName) // 或者，模糊匹配基金简称
-                .or().like("fund_code", fundName)    // 或者，模糊匹配基金代码
-            );
+            queryWrapper.and(wrapper -> wrapper.like("fund_name", fundName)
+                .or().like("abbreviation", fundName)
+                .or().like("fund_code", fundName));
         }
         if (StringUtils.hasText(fundType)) {
             String fundTypeCode = translateFundType(fundType);
@@ -54,10 +51,10 @@ public class FundInfoServiceImpl implements FundInfoService {
                 queryWrapper.eq("fund_invest_type", fundTypeCode);
             }
         }
-
         queryWrapper.orderByAsc("fund_code");
 
         // --- 步骤 2: 对 fund_basic_info 表执行快速的分页查询 ---
+        // 这一步非常快，因为它只查询一张表，并且分页插件能正确处理
         fundBasicInfoMapper.selectPage(page, queryWrapper);
 
         // --- 步骤 3: 在内存中，为当前页的数据拼接上最新业绩 ---
@@ -70,7 +67,7 @@ public class FundInfoServiceImpl implements FundInfoService {
                 .map(FundBasicInfo::getFundCode)
                 .collect(Collectors.toList());
 
-        // 批量获取这10只基金的最新业绩，这个查询也非常快。
+        // 批量获取这10或20只基金的最新业绩，这个查询也非常快
         Map<String, FundNetValuePerfRank> perfRankMap = fundNetValuePerfRankMapper.findLatestPerfRankByFundCodes(fundCodesOnPage)
                 .stream()
                 .collect(Collectors.toMap(FundNetValuePerfRank::getFundCode, perf -> perf));
@@ -86,6 +83,7 @@ public class FundInfoServiceImpl implements FundInfoService {
 
         return page;
     }
+
 
     /**
      * 获取基金详情页的聚合数据（此方法保持不变）。

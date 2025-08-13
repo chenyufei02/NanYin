@@ -9,7 +9,7 @@ import java.util.List;
 public interface FundInfoService {
 
     /**
-     * 【新增】为“基金超市”页面提供分页和条件搜索功能。
+     * 为“基金超市”页面提供分页和条件搜索功能。
      * @param page 分页对象
      * @param fundCode 基金代码 (模糊查询)
      * @param fundName 基金名称 (模糊查询)
@@ -19,7 +19,7 @@ public interface FundInfoService {
     Page<FundBasicInfo> getFundBasicInfoPage(Page<FundBasicInfo> page, String fundCode, String fundName, String fundType);
 
     /**
-     * 【新增】为“基金详情页”提供所有需要的聚合数据。
+     * 为“基金详情页”提供所有需要的聚合数据。
      * @param fundCode 基金代码
      * @return 包含基金所有详细信息的VO对象
      */
