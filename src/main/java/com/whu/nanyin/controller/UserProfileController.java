@@ -62,8 +62,9 @@ public class UserProfileController {
         UserProfile userProfileEntity = userProfileService.getUserProfileByUserId(currentUserId);
 
         if (userProfileEntity == null) {
-            return ResponseEntity.status(404).body(ApiResponseVO.error("找不到用户个人资料"));
+            return ResponseEntity.ok(ApiResponseVO.success("暂无个人资料,请添加！", null));
         }
+
         UserProfileVO userProfileVO = new UserProfileVO();
         BeanUtils.copyProperties(userProfileEntity, userProfileVO);
         return ResponseEntity.ok(ApiResponseVO.success("个人资料获取成功", userProfileVO));
