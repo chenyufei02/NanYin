@@ -2,11 +2,9 @@ package com.whu.nanyin.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.whu.nanyin.mapper.UserMapper;
 import com.whu.nanyin.pojo.dto.UserProfileUpdateDTO;
-import com.whu.nanyin.pojo.entity.FundBasicInfo; // 【修正】导入新的 FundBasicInfo
-import com.whu.nanyin.pojo.entity.FundTransaction;
-import com.whu.nanyin.pojo.entity.UserHolding;
-import com.whu.nanyin.pojo.entity.UserProfile;
+import com.whu.nanyin.pojo.entity.*;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.UserDashboardVO;
 import com.whu.nanyin.pojo.vo.UserProfileVO;
@@ -48,6 +46,7 @@ public class UserProfileController {
     @Autowired private FundInfoService fundInfoService;
     @Autowired private FundTransactionService fundTransactionService;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private UserMapper userMapper;
 
     /**
      * 获取当前登录用户的基本个人资料。
@@ -61,12 +60,21 @@ public class UserProfileController {
         Long currentUserId = userDetails.getId();
         UserProfile userProfileEntity = userProfileService.getUserProfileByUserId(currentUserId);
 
+        // 【核心修改】即使找到了Profile，也要再去查询User表来获取余额
+        com.whu.nanyin.pojo.entity.User currentUser = userMapper.selectById(currentUserId);
+
         if (userProfileEntity == null) {
-            return ResponseEntity.ok(ApiResponseVO.success("暂无个人资料,请添加！", null));
+            return ResponseEntity.ok(ApiResponseVO.success("新用户，暂无个人资料", null));
         }
 
         UserProfileVO userProfileVO = new UserProfileVO();
         BeanUtils.copyProperties(userProfileEntity, userProfileVO);
+
+        // 【核心修改】将查询到的余额设置到VO中
+        if (currentUser != null) {
+            userProfileVO.setBalance(currentUser.getBalance());
+        }
+
         return ResponseEntity.ok(ApiResponseVO.success("个人资料获取成功", userProfileVO));
     }
 
@@ -100,15 +108,29 @@ public class UserProfileController {
     @GetMapping("/dashboard")
     @Operation(summary = "获取当前登录用户的主页仪表盘所有数据")
     public ResponseEntity<ApiResponseVO<UserDashboardVO>> getMyDashboard(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(ApiResponseVO.error("用户未登录"));
+        }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
 
         try {
+            // 在方法内部正确地声明和初始化 dashboardVO
             UserDashboardVO dashboardVO = new UserDashboardVO();
-            dashboardVO.setUserProfile(userProfileService.getUserProfileByUserId(currentUserId));
-            dashboardVO.setProfitLossStats(userProfileService.getProfitLossVOByUserId(currentUserId));
-            dashboardVO.setTopHoldings(userHoldingService.getTopNHoldings(currentUserId, 10));
 
+            // 1. 从users表中查询并设置balance
+            User currentUser = userMapper.selectById(currentUserId);
+            if (currentUser != null) {
+                dashboardVO.setBalance(currentUser.getBalance());
+            }
+
+            // 2. 聚合个人基本资料
+            dashboardVO.setUserProfile(userProfileService.getUserProfileByUserId(currentUserId));
+            // 3. 聚合个人盈亏统计
+            dashboardVO.setProfitLossStats(userProfileService.getProfitLossVOByUserId(currentUserId));
+            // 4. 聚合市值最高的10条持仓记录
+            dashboardVO.setTopHoldings(userHoldingService.getTopNHoldings(currentUserId, 10));
+            // 5. 聚合所有图表所需的数据
             prepareChartData(currentUserId, dashboardVO);
             prepareHistoricalData(currentUserId, dashboardVO);
 

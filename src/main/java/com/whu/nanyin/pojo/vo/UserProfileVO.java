@@ -2,6 +2,8 @@ package com.whu.nanyin.pojo.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -44,4 +46,8 @@ public class UserProfileVO {
 
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
+
+    @Schema(description = "账户可用余额")
+    private BigDecimal balance;
+
 }

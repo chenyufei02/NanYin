@@ -9,6 +9,7 @@ import com.whu.nanyin.pojo.vo.ProfitLossVO;
 import com.whu.nanyin.service.UserProfileService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserProfile> implements UserProfileService {
@@ -22,6 +23,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
      * 【核心修正】此方法现在接收一个从安全上下文传来的、绝对可靠的userId
      */
     @Override
+    @Transactional
     public UserProfile updateUserProfile(Long userId, UserProfileUpdateDTO dto) {
         UserProfile userProfile = this.getUserProfileByUserId(userId);
         if (userProfile == null) {

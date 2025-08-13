@@ -2,6 +2,8 @@ package com.whu.nanyin.pojo.vo;
 
 import com.whu.nanyin.pojo.entity.UserProfile;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -15,4 +17,5 @@ public class UserDashboardVO {
     private String historicalDataJson; // 历史走势图数据 (JSON字符串)
     private String monthlyFlowJson; // 月度资金流图数据 (JSON字符串)
     private String colorMapJson; // 图表颜色映射 (JSON字符串)
+    private BigDecimal balance;  // 存放可用余额
 }
