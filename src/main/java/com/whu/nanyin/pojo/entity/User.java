@@ -2,6 +2,8 @@ package com.whu.nanyin.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,6 +16,8 @@ public class User {
     private String username;
 
     private String password;
+
+    private BigDecimal balance;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

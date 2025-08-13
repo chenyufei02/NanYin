@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 【新增】导入Transactional
 
+import java.math.BigDecimal;
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -47,6 +49,8 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setUsername(registerDTO.getUsername());
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+
+        user.setBalance(new BigDecimal("999999.00"));
         userMapper.insert(user); // 注意：执行后，user对象会自动获得数据库生成的ID
 
         // 2. 【新增】为该用户创建一条空的个人资料记录 (user_profiles表)

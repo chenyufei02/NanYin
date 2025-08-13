@@ -15,18 +15,21 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
 
     @Override
     public UserProfile getUserProfileByUserId(Long userId) {
-        // 使用QueryWrapper通过user_id查询，而不是主键id
         return this.getOne(new QueryWrapper<UserProfile>().eq("user_id", userId));
     }
 
+    /**
+     * 【核心修正】此方法现在接收一个从安全上下文传来的、绝对可靠的userId
+     */
     @Override
     public UserProfile updateUserProfile(Long userId, UserProfileUpdateDTO dto) {
         UserProfile userProfile = this.getUserProfileByUserId(userId);
         if (userProfile == null) {
             throw new RuntimeException("找不到该用户的个人资料");
         }
-        // 将DTO中的更新信息，复制到从数据库查出的实体对象上
+        // 将不包含userId的DTO中的更新信息，复制到从数据库查出的实体对象上
         BeanUtils.copyProperties(dto, userProfile);
+
         // 执行更新
         this.updateById(userProfile);
         return userProfile;

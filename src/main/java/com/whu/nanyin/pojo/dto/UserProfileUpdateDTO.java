@@ -17,10 +17,6 @@ import javax.validation.constraints.Pattern;
 @Schema(description = "客户更新请求对象")
 public class UserProfileUpdateDTO {
 
-    @NotNull(message = "客户ID不能为空")
-    @Schema(description = "客户ID", example = "1")
-    private Long id;
-
     @NotBlank(message = "姓名不能为空")
     @Schema(description = "姓名", example = "张三")
     private String name;
