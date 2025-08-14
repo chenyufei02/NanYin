@@ -44,4 +44,8 @@ public class FundTransactionVO {
 
     @Schema(description = "基金名称")
     private String fundName;
+
+    // --- 扩展信息 ---
+    @Schema(description = "交易完成后的可用余额")
+    private BigDecimal availableBalance;
 }

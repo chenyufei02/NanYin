@@ -4,6 +4,8 @@ import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
 import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.FundTransaction;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
+import com.whu.nanyin.mapper.UserMapper;
+import com.whu.nanyin.pojo.entity.User;
 import com.whu.nanyin.pojo.vo.FundTransactionVO;
 import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.FundTransactionService;
@@ -26,6 +28,9 @@ public class FundTransactionController {
     @Autowired
     private FundTransactionService fundTransactionService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Operation(summary = "申购基金")
     @PostMapping("/purchase")
     public ResponseEntity<ApiResponseVO<FundTransactionVO>> purchase(@RequestBody @Validated FundPurchaseDTO dto, Authentication authentication) {
@@ -37,6 +42,11 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 查询最新余额，用于回传给前端直接展示
+            User currentUser = userMapper.selectById(currentUserId);
+            if (currentUser != null) {
+                vo.setAvailableBalance(currentUser.getBalance());
+            }
 
             return ResponseEntity.ok(ApiResponseVO.success("申购成功", vo));
         } catch (Exception e) {
