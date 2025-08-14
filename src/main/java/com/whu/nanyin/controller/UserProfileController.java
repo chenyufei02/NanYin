@@ -91,6 +91,7 @@ public class UserProfileController {
         Long currentUserId = userDetails.getId();
         try {
             UserProfile updatedProfileEntity = userProfileService.updateUserProfile(currentUserId, dto);
+
             UserProfileVO updatedProfileVO = new UserProfileVO();
             BeanUtils.copyProperties(updatedProfileEntity, updatedProfileVO);
             return ResponseEntity.ok(ApiResponseVO.success("个人资料更新成功", updatedProfileVO));
