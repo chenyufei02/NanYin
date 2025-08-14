@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whu.nanyin.mapper.FundBasicInfoMapper">
+
+    <select id="searchFundList" resultType="com.whu.nanyin.pojo.entity.FundBasicInfo">
+        SELECT
+            b.*,
+            p.unit_net_value AS latestNetValue,
+            p.daily_growth_rate AS dailyGrowthRate
+        FROM
+            fund_basic_info b
+        INNER JOIN
+            fund_net_value_perf_rank p ON b.fund_code = p.fund_code
+        INNER JOIN
+            (SELECT fund_code, MAX(end_date) as max_date
+             FROM fund_net_value_perf_rank
+             GROUP BY fund_code) latest_p
+        ON
+            p.fund_code = latest_p.fund_code AND p.end_date = latest_p.max_date
+        <where>
+            <if test="true">
+                AND p.unit_net_value IS NOT NULL AND p.unit_net_value > 0
+            </if>
+            <if test="fundName != null and fundName != ''">
+                AND (b.fund_name LIKE CONCAT('%', #{fundName}, '%') OR b.abbreviation LIKE CONCAT('%', #{fundName}, '%'))
+            </if>
+            <if test="fundCode != null and fundCode != ''">
+                AND b.fund_code LIKE CONCAT('%', #{fundCode}, '%')
+            </if>
+            <if test="fundType != null and fundType != ''">
+                 AND b.fund_invest_type = #{fundType}
+            </if>
+        </where>
+        ORDER BY b.fund_code ASC
+    </select>
+
+</mapper>

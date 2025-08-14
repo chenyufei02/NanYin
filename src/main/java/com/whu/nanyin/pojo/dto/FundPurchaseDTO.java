@@ -12,15 +12,14 @@ import java.time.LocalDateTime;
 @Schema(description = "基金申购请求对象")
 public class FundPurchaseDTO {
 
-    @NotNull(message = "客户ID不能为空")
-    @Schema(description = "客户ID", example = "1")
-    private Long customerId;
+
+    @Schema(description = "用户ID", example = "1")
+    private Long userId;
 
     @NotBlank(message = "基金代码不能为空")
     @Schema(description = "基金代码", example = "000001")
     private String fundCode;
 
-    // 这里只保留了交易金额，完全移除了交易份额字段
     @NotNull(message = "申购金额不能为空")
     @Positive(message = "申购金额必须为正数")
     @Schema(description = "申购金额", example = "1000.00")

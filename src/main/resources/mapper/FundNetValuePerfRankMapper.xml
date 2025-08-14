@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whu.nanyin.mapper.FundNetValuePerfRankMapper">
+
+    <select id="findLatestPerfRankByFundCodes" resultType="com.whu.nanyin.pojo.entity.FundNetValuePerfRank">
+        SELECT p1.*
+        FROM fund_net_value_perf_rank p1
+        INNER JOIN (
+            SELECT fund_code, MAX(end_date) AS max_date
+            FROM fund_net_value_perf_rank
+            WHERE fund_code IN
+            <foreach item="code" collection="fundCodes" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+            GROUP BY fund_code
+        ) p2 ON p1.fund_code = p2.fund_code AND p1.end_date = p2.max_date
+    </select>
+
+</mapper>

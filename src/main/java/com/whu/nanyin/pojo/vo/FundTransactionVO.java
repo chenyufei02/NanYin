@@ -33,10 +33,10 @@ public class FundTransactionVO {
 
     // --- 关联的客户信息 ---
     @Schema(description = "客户ID")
-    private Long customerId;
+    private Long userId;
 
     @Schema(description = "客户姓名")
-    private String customerName;
+    private String userName;
 
     // --- 关联的基金信息 ---
     @Schema(description = "基金代码")

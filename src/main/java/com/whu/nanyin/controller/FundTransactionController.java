@@ -1,52 +1,99 @@
 package com.whu.nanyin.controller;
 
-import com.whu.nanyin.pojo.dto.FundPurchaseDTO; //
-import com.whu.nanyin.pojo.dto.FundRedeemDTO;   //
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
+import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.vo.ApiResponseVO;
+import com.whu.nanyin.pojo.vo.FundTransactionVO;
+import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.FundTransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/fund-transaction")
-@Tag(name = "基金交易记录管理", description = "提供基金交易的记录和查询接口")
+@RequestMapping("/api/transaction")
+@Tag(name = "个人基金交易", description = "提供个人基金交易的申购、赎回与查询接口")
 public class FundTransactionController {
 
     @Autowired
     private FundTransactionService fundTransactionService;
 
-// ================ 以下没有提供前端接口实现 ================
     @Operation(summary = "申购基金")
     @PostMapping("/purchase")
-    public FundTransaction purchase(@RequestBody @Validated FundPurchaseDTO dto) {
-        return fundTransactionService.createPurchaseTransaction(dto);
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> purchase(@RequestBody @Validated FundPurchaseDTO dto, Authentication authentication) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long currentUserId = userDetails.getId();
+            dto.setUserId(currentUserId);
+            FundTransaction entity = fundTransactionService.createPurchaseTransaction(dto);
+
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("申购成功", vo));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponseVO.error("申购失败: " + e.getMessage()));
+        }
     }
 
     @Operation(summary = "赎回基金")
     @PostMapping("/redeem")
-    public FundTransaction redeem(@RequestBody @Validated FundRedeemDTO dto) {
-        return fundTransactionService.createRedeemTransaction(dto);
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> redeem(@RequestBody @Validated FundRedeemDTO dto, Authentication authentication) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long currentUserId = userDetails.getId();
+            dto.setUserId(currentUserId);
+            FundTransaction entity = fundTransactionService.createRedeemTransaction(dto);
+
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("赎回成功", vo));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponseVO.error("赎回失败: " + e.getMessage()));
+        }
     }
 
-// ============ 以下在pagecontroller里优化为了综合根据客户姓名、基金代码、交易类型查询 ============
-    @Operation(summary = "根据客户ID查询其所有交易记录")
-    @GetMapping("/customer/{customerId}")
-    public List<FundTransaction> listByCustomerId(@PathVariable Long customerId) {
-        QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("customer_id", customerId);
-        queryWrapper.orderByDesc("transaction_time"); // 按交易时间降序
-        return fundTransactionService.list(queryWrapper);
+    @Operation(summary = "查询【当前登录用户】的所有交易记录")
+    @GetMapping("/my-transactions")
+    public ResponseEntity<ApiResponseVO<List<FundTransactionVO>>> getMyTransactions(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
+        List<FundTransaction> transactionEntities = fundTransactionService.listByUserId(currentUserId);
+
+        List<FundTransactionVO> transactionVOs = transactionEntities.stream().map(entity -> {
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+            // 注意：这里未来可能需要关联查询基金名称(fundName)、客户姓名(customerName)等
+            return vo;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponseVO.success("交易记录获取成功", transactionVOs));
     }
 
-    @Operation(summary = "根据交易ID查询单条交易详情")
+    @Operation(summary = "根据交易ID查询【当前用户】的单条交易详情")
     @GetMapping("/{id}")
-    public FundTransaction getById(@PathVariable Long id) {
-        return fundTransactionService.getById(id);
+    public ResponseEntity<ApiResponseVO<FundTransactionVO>> getById(@PathVariable Long id, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getId();
+        try {
+            FundTransaction entity = fundTransactionService.getTransactionByIdAndUserId(id, currentUserId);
+
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(entity, vo);
+
+            return ResponseEntity.ok(ApiResponseVO.success("交易详情获取成功", vo));
+        } catch (Exception e) {
+            // Service层在找不到或无权访问时会抛出异常
+            return ResponseEntity.status(403).body(ApiResponseVO.error(e.getMessage()));
+        }
     }
 }

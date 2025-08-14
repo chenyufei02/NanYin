@@ -6,26 +6,20 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("fund_transaction")
+@TableName("user_transactions")
 public class FundTransaction {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long customerId;
+    private Long userId;
 
     private String fundCode;
-
     private String transactionType;
-
-    private BigDecimal transactionAmount; // 交易金额
-
-    private BigDecimal transactionShares;  // 交易份额
-
-    private BigDecimal sharePrice;       // 成交净值（模拟）
-
+    private BigDecimal transactionAmount;
+    private BigDecimal transactionShares;
+    private BigDecimal sharePrice;
     private LocalDateTime transactionTime;
-
     private String status;
 
     @TableField(fill = FieldFill.INSERT)
