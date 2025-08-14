@@ -3,8 +3,11 @@ package com.whu.nanyin.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.whu.nanyin.pojo.entity.FundBasicInfo;
 import com.whu.nanyin.pojo.vo.FundDetailVO; // <-- 需要新建这个VO
+import com.whu.nanyin.pojo.vo.FundNetValueTrendVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface FundInfoService {
 
@@ -30,4 +33,17 @@ public interface FundInfoService {
      * @return 所有基金基础信息的列表
      */
     List<FundBasicInfo> listAllBasicInfos();
+
+    /**
+     * 获取指定时间范围内的基金净值走势数据
+     * @param fundCodes 基金代码列表
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 按基金代码分组的净值走势数据
+     */
+    Map<String, List<FundNetValueTrendVO>> getFundNetValueTrends(
+        List<String> fundCodes,
+        LocalDateTime startDate,
+        LocalDateTime endDate
+    );
 }

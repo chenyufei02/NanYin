@@ -14,10 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.whu.nanyin.pojo.vo.FundNetValueTrendVO;
+import org.springframework.beans.BeanUtils;
 
 @Service
 public class FundInfoServiceImpl implements FundInfoService {
@@ -128,6 +131,34 @@ public class FundInfoServiceImpl implements FundInfoService {
     }
 
 
+    @Override
+    public Map<String, List<FundNetValueTrendVO>> getFundNetValueTrends(
+        List<String> fundCodes,
+        LocalDateTime startDate,
+        LocalDateTime endDate
+    ) {
+        // 获取原始净值数据
+        List<FundNetValue> netValues = fundNetValueMapper.findNetValueTrendByDateRange(fundCodes, startDate, endDate);
+
+        // 转换为VO对象并按基金代码分组
+        return netValues.stream()
+            .map(nv -> {
+                FundNetValueTrendVO vo = new FundNetValueTrendVO();
+                vo.setFundCode(nv.getFundCode());
+                vo.setDate(nv.getEndDate());
+                vo.setUnitNetValue(nv.getUnitNetValue());
+                vo.setAccumNetValue(nv.getAccumNetValue());
+                return vo;
+            })
+            .collect(Collectors.groupingBy(
+                FundNetValueTrendVO::getFundCode,
+                Collectors.toList()
+            ));
+    }
+
+    /**
+     * 【新增辅助方法】用于将前端的基金类型文本翻译为数据库代码。
+     */
     private String translateFundType(String fundType) {
         if (fundType == null) return null;
         return switch (fundType) {
