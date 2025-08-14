@@ -17,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -80,11 +82,11 @@ public class FundTransactionController {
 
     @Operation(summary = "查询【当前登录用户】的所有交易记录")
     @GetMapping("/my-transactions")
-    public ResponseEntity<ApiResponseVO<List<FundTransactionVO>>> getMyTransactions(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getMyTransactions(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
         List<FundTransaction> transactionEntities = fundTransactionService.listByUserId(currentUserId);
-
+    
         List<FundTransactionVO> transactionVOs = transactionEntities.stream().map(entity -> {
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
@@ -93,8 +95,10 @@ public class FundTransactionController {
             // 注意：这里未来可能需要关联查询基金名称(fundName)、客户姓名(customerName)等
             return vo;
         }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(ApiResponseVO.success("交易记录获取成功", transactionVOs));
+    
+        Map<String, Object> response = new HashMap<>();
+        response.put("transactions", transactionVOs);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "根据交易ID查询【当前用户】的单条交易详情")
