@@ -48,4 +48,7 @@ public class FundTransactionVO {
     // --- 扩展信息 ---
     @Schema(description = "交易完成后的可用余额")
     private BigDecimal availableBalance;
+    
+    @Schema(description = "购买所用银行卡号")
+    private String bankAccountNumber;
 }
