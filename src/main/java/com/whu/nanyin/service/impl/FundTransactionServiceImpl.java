@@ -7,6 +7,7 @@ import com.whu.nanyin.mapper.FundTransactionMapper;
 import com.whu.nanyin.mapper.UserMapper;
 import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
 import com.whu.nanyin.pojo.dto.FundRedeemDTO;
+import com.whu.nanyin.pojo.entity.User;
 import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundTransaction;
 import com.whu.nanyin.pojo.vo.FundDetailVO;
@@ -53,76 +54,74 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     @Override
     @Transactional
     public FundTransaction createPurchaseTransaction(FundPurchaseDTO dto) {
-        log.info("[Purchase] Request received userId={}, fundCode={}, amount={}, time={}", dto.getUserId(), dto.getFundCode(), dto.getTransactionAmount(), dto.getTransactionTime());
+        // 1. 校验用户余额
+        User user = userMapper.selectById(dto.getUserId());
+        if (user == null || user.getBalance().compareTo(dto.getTransactionAmount()) < 0) {
+            throw new InsufficientFundsException("购买失败：账户余额不足。");
+        }
 
+        // 2. 扣除余额
+        user.setBalance(user.getBalance().subtract(dto.getTransactionAmount()));
+        userMapper.updateById(user);
+
+        // 3. 获取基金信息
         FundDetailVO fundDetail = fundInfoService.getFundDetail(dto.getFundCode());
         Assert.notNull(fundDetail, "找不到对应的基金信息：" + dto.getFundCode());
         Assert.notNull(fundDetail.getPerformance(), "该基金暂无有效的业绩信息，无法交易。");
-
-        // 从最新的业绩信息中获取净值
         BigDecimal sharePrice = fundDetail.getPerformance().getUnitNetValue();
         Assert.notNull(sharePrice, "该基金暂无有效的净值信息，无法交易。");
 
-        // 先执行余额扣减（与交易、持仓更新同处一个事务内）
-        int affected = userMapper.deductBalanceIfEnough(dto.getUserId(), dto.getTransactionAmount());
-        log.info("[Purchase] Deduct balance affectedRows={}, userId={}, amount={}", affected, dto.getUserId(), dto.getTransactionAmount());
-        if (affected == 0) {
-            throw new InsufficientFundsException("申购失败：账户余额不足，无法完成扣款。");
-        }
-
+        // 4. 创建交易实体
         FundTransaction transaction = new FundTransaction();
         BeanUtils.copyProperties(dto, transaction);
-        if (transaction.getTransactionTime() == null) {
-            transaction.setTransactionTime(java.time.LocalDateTime.now());
-        }
-        if (transaction.getTransactionTime() == null) {
-            transaction.setTransactionTime(java.time.LocalDateTime.now());
-        }
-
         transaction.setTransactionType("申购");
         transaction.setSharePrice(sharePrice);
         transaction.setStatus("成功");
 
-        BigDecimal shares = dto.getTransactionAmount().divide(sharePrice, 2, RoundingMode.DOWN);
+        // --- 【【【 核心修正：修正份额计算的精度和舍入模式 】】】 ---
+        BigDecimal shares = dto.getTransactionAmount().divide(sharePrice, 4, RoundingMode.HALF_UP);
         transaction.setTransactionShares(shares);
 
-        FundTransaction saved = saveTransactionAndUpdateHolding(transaction);
-        log.info("[Purchase] Transaction saved id={}, shares={}, sharePrice={}", saved.getId(), saved.getTransactionShares(), saved.getSharePrice());
-        return saved;
+        // 5. 保存交易并更新持仓
+        return saveTransactionAndUpdateHolding(transaction);
     }
 
-    /**
-     * 处理基金赎回业务，包含核心的持仓校验逻辑
-     * @param dto 包含赎回信息的DTO对象
-     * @return 创建并保存好的交易记录实体
-     */
     @Override
     @Transactional
     public FundTransaction createRedeemTransaction(FundRedeemDTO dto) {
+        // 1. 校验持仓份额
         QueryWrapper<UserHolding> holdingQuery = new QueryWrapper<>();
         holdingQuery.eq("user_id", dto.getUserId()).eq("fund_code", dto.getFundCode());
         UserHolding currentHolding = userHoldingService.getOne(holdingQuery);
-
         if (currentHolding == null || dto.getTransactionShares().compareTo(currentHolding.getTotalShares()) > 0) {
             String availableShares = (currentHolding != null) ? currentHolding.getTotalShares().toPlainString() : "0";
             throw new InsufficientFundsException("赎回失败：份额不足。当前持有 " + availableShares + " 份，尝试赎回 " + dto.getTransactionShares().toPlainString() + " 份。");
         }
 
+        // 2. 获取基金信息
         FundDetailVO fundDetail = fundInfoService.getFundDetail(dto.getFundCode());
         Assert.notNull(fundDetail, "找不到对应的基金信息：" + dto.getFundCode());
         Assert.notNull(fundDetail.getPerformance(), "该基金暂无有效的业绩信息，无法交易。");
         BigDecimal sharePrice = fundDetail.getPerformance().getUnitNetValue();
         Assert.notNull(sharePrice, "该基金暂无有效的净值信息，无法交易。");
 
+        // 3. 计算赎回金额
+        BigDecimal redeemAmount = dto.getTransactionShares().multiply(sharePrice).setScale(2, RoundingMode.HALF_UP);
+
+        // 4. 增加用户余额
+        User user = userMapper.selectById(dto.getUserId());
+        user.setBalance(user.getBalance().add(redeemAmount));
+        userMapper.updateById(user);
+
+        // 5. 创建交易实体
         FundTransaction transaction = new FundTransaction();
         BeanUtils.copyProperties(dto, transaction);
         transaction.setTransactionType("赎回");
         transaction.setSharePrice(sharePrice);
         transaction.setStatus("成功");
+        transaction.setTransactionAmount(redeemAmount);
 
-        BigDecimal amount = dto.getTransactionShares().multiply(sharePrice).setScale(2, RoundingMode.HALF_UP);
-        transaction.setTransactionAmount(amount);
-
+        // 6. 保存交易并更新持仓
         return saveTransactionAndUpdateHolding(transaction);
     }
 

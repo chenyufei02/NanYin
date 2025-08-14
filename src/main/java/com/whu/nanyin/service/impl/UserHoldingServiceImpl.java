@@ -1,3 +1,4 @@
+// 文件路径: src/main/java/com/whu/nanyin/service/impl/UserHoldingServiceImpl.java
 package com.whu.nanyin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -6,7 +7,7 @@ import com.whu.nanyin.mapper.UserHoldingMapper;
 import com.whu.nanyin.pojo.entity.FundTransaction;
 import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.UserProfile;
-import com.whu.nanyin.pojo.vo.FundDetailVO; // 确保导入 FundDetailVO
+import com.whu.nanyin.pojo.vo.FundDetailVO;
 import com.whu.nanyin.pojo.vo.UserHoldingVO;
 import com.whu.nanyin.service.FundInfoService;
 import com.whu.nanyin.service.UserHoldingService;
@@ -98,7 +99,6 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
     @Override
     @Transactional(readOnly = true)
     public List<UserHoldingVO> getTopNHoldings(Long userId, int limit) {
-        // ... (此方法无需修改) ...
         QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                     .orderByDesc("market_value")
