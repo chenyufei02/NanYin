@@ -42,6 +42,10 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
             // 查询最新余额，用于回传给前端直接展示
             User currentUser = userMapper.selectById(currentUserId);
             if (currentUser != null) {
@@ -65,6 +69,8 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
 
             return ResponseEntity.ok(ApiResponseVO.success("赎回成功", vo));
         } catch (Exception e) {
@@ -82,6 +88,8 @@ public class FundTransactionController {
         List<FundTransactionVO> transactionVOs = transactionEntities.stream().map(entity -> {
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
             // 注意：这里未来可能需要关联查询基金名称(fundName)、客户姓名(customerName)等
             return vo;
         }).collect(Collectors.toList());
@@ -99,6 +107,8 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
 
             return ResponseEntity.ok(ApiResponseVO.success("交易详情获取成功", vo));
         } catch (Exception e) {
