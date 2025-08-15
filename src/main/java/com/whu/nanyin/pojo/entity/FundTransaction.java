@@ -30,7 +30,6 @@ public class FundTransaction {
     @TableField("status")
     private String status;
 
-    // 购买所用银行卡号
     @TableField("bank_account_number")
     private String bankAccountNumber;
 
