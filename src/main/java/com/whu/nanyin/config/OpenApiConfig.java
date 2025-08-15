@@ -18,9 +18,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
             .info(new Info()
-                .title("泓镜客户管理系统 API")
+                .title("泓镜基金系统 API")
                 .version("2.0")
-                .description("泓镜客户管理系统的REST API接口文档")
+                .description("泓镜基金系统的REST API接口文档")
                 .contact(new Contact()
                     .name("开发者")
                     .email("chenqi02@whu.edu.cn")

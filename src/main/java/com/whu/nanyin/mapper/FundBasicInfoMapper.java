@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface FundBasicInfoMapper extends BaseMapper<FundBasicInfo> {
-    // 【修改】让MyBatis-Plus知道，这个方法将返回一个Page对象
+    // 让MyBatis-Plus知道，这个方法将返回一个Page对象
     Page<FundBasicInfo> searchFundList(Page<FundBasicInfo> page, @Param("fundCode") String fundCode, @Param("fundName") String fundName, @Param("fundType") String fundType);
 }

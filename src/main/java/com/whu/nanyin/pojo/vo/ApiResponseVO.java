@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "通用API响应对象")
-public class ApiResponseVO<T> { // 【1. 新增泛型 <T>】
+public class ApiResponseVO<T> { // 【 泛型 <T>】
 
     @Schema(description = "操作是否成功", example = "true")
     private boolean success;
@@ -15,14 +15,8 @@ public class ApiResponseVO<T> { // 【1. 新增泛型 <T>】
     private String message;
 
     @Schema(description = "携带的额外数据")
-    private T data; // 【2. 新增一个可以存放任何类型数据的字段】
+    private T data; // 【可以存放任何类型数据的字段】
 
-    // --- 【3. 新增多个方便使用的构造函数】 ---
-
-    public ApiResponseVO(boolean success, String message) {
-        this.success = success;
-        this.message = message;
-    }
 
     public ApiResponseVO(boolean success, String message, T data) {
         this.success = success;

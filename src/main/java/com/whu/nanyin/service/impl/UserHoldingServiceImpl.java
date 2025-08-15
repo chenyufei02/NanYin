@@ -102,7 +102,7 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
     @Override
     @Transactional(readOnly = true)
     public List<UserHoldingVO> getTopNHoldings(Long userId, int limit) {
-        List<UserHolding> topHoldings = baseMapper.getTopNHoldings(userId, limit);
+        List<UserHolding> topHoldings ;
         QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                     .orderByDesc("market_value")
