@@ -13,9 +13,6 @@ import java.time.LocalDateTime;
 @Schema(description = "基金赎回请求对象")
 public class FundRedeemDTO {
 
-    @Schema(description = "用户ID", example = "1")
-    private Long userId;
-
     @NotBlank(message = "基金代码不能为空")
     @Schema(description = "基金代码", example = "000001")
     private String fundCode;
