@@ -1,4 +1,3 @@
-// 文件路径: src/main/java/com/whu/nanyin/service/impl/UserHoldingServiceImpl.java
 package com.whu.nanyin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -35,9 +34,12 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
 
     @Override
     public List<UserHolding> listByuserId(Long userId) {
-        QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
-        return this.list(queryWrapper);
+        return baseMapper.listByUserId(userId);
+    }
+
+    @Override
+    public List<UserHolding> listByUserIdAndFundInfo(Long userId, String fundCode, String fundName) {
+        return baseMapper.listByUserIdAndFundInfo(userId, fundCode, fundName);
     }
 
     /**
@@ -99,11 +101,12 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
     @Override
     @Transactional(readOnly = true)
     public List<UserHoldingVO> getTopNHoldings(Long userId, int limit) {
+        List<UserHolding> topHoldings = baseMapper.getTopNHoldings(userId, limit);
         QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                     .orderByDesc("market_value")
                     .last("LIMIT " + limit);
-        List<UserHolding> topHoldings = this.list(queryWrapper);
+        topHoldings = this.list(queryWrapper);
 
         if (topHoldings.isEmpty()) {
             return Collections.emptyList();

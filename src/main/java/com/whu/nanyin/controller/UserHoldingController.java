@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,20 +29,29 @@ public class UserHoldingController {
     @Operation(summary = "查询【当前登录用户】的所有持仓信息")
     @GetMapping("/my-holdings")
     // 将返回类型用 ApiResponseVO 包装起来
-    public ResponseEntity<ApiResponseVO<List<UserHoldingVO>>> getMyHoldings(Authentication authentication) {
+    public ResponseEntity<ApiResponseVO<List<UserHoldingVO>>> getMyHoldings(
+            Authentication authentication,
+            @RequestParam(required = false) String fundCode,
+            @RequestParam(required = false) String fundName) {
         if (authentication == null) {
             return ResponseEntity.status(401).body(ApiResponseVO.error("用户未登录"));
         }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
 
-        List<UserHolding> holdingEntities = userHoldingService.listByuserId(currentUserId);
+        List<UserHolding> holdingEntities;
+        
+        // 根据是否提供查询参数决定使用哪个查询方法
+        if ((fundCode != null && !fundCode.trim().isEmpty()) || (fundName != null && !fundName.trim().isEmpty())) {
+            holdingEntities = userHoldingService.listByUserIdAndFundInfo(currentUserId, fundCode, fundName);
+        } else {
+            holdingEntities = userHoldingService.listByuserId(currentUserId);
+        }
 
         // 将Entity列表转换为VO列表
         List<UserHoldingVO> holdingVOs = holdingEntities.stream().map(entity -> {
             UserHoldingVO vo = new UserHoldingVO();
             BeanUtils.copyProperties(entity, vo);
-            // 注意：这里未来可能需要关联查询基金名称(fundName)等额外信息并设置到vo中
             return vo;
         }).collect(Collectors.toList());
 
