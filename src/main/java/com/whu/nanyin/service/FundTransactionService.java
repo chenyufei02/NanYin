@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
 import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.vo.FundTransactionVO;
 
 import java.util.List;
 
@@ -15,8 +16,13 @@ public interface FundTransactionService extends IService<FundTransaction> {
 
     List<FundTransaction> listByUserId(Long userId);
 
+    // 获取用户交易记录并包含基金名称
+    List<FundTransactionVO> listByUserIdWithFundName(Long userId);
 
     // 根据交易ID和用户ID，安全地获取单条交易详情
     FundTransaction getTransactionByIdAndUserId(Long transactionId, Long userId);
+
+    // 根据交易ID和用户ID，安全地获取单条交易详情并包含基金名称
+    FundTransactionVO getTransactionByIdAndUserIdWithFundName(Long transactionId, Long userId);
 
 }

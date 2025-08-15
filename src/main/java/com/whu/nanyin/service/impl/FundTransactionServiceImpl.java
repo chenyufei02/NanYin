@@ -10,7 +10,9 @@ import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.User;
 import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundTransaction;
+import com.whu.nanyin.pojo.entity.FundBasicInfo;
 import com.whu.nanyin.pojo.vo.FundDetailVO;
+import com.whu.nanyin.pojo.vo.FundTransactionVO;
 import com.whu.nanyin.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import org.springframework.util.Assert;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -128,8 +131,25 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     public List<FundTransaction> listByUserId(Long userId) {
         QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        queryWrapper.orderByDesc("transaction_time"); // 按交易时间降序
+        queryWrapper.orderByAsc("id"); // 按ID升序排序，确保从1开始
         return this.list(queryWrapper);
+    }
+
+    @Override
+    public List<FundTransactionVO> listByUserIdWithFundName(Long userId) {
+        List<FundTransaction> transactions = listByUserId(userId);
+        return transactions.stream().map(transaction -> {
+            FundTransactionVO vo = new FundTransactionVO();
+            BeanUtils.copyProperties(transaction, vo);
+            
+            // 根据fund_code查询基金名称
+            FundDetailVO fundDetail = fundInfoService.getFundDetail(transaction.getFundCode());
+            if (fundDetail != null && fundDetail.getBasicInfo() != null) {
+                vo.setFundName(fundDetail.getBasicInfo().getFundName());
+            }
+            
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -163,6 +183,22 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
         }
 
         return transaction;
+    }
+
+    @Override
+    public FundTransactionVO getTransactionByIdAndUserIdWithFundName(Long transactionId, Long userId) {
+        FundTransaction transaction = getTransactionByIdAndUserId(transactionId, userId);
+        
+        FundTransactionVO vo = new FundTransactionVO();
+        BeanUtils.copyProperties(transaction, vo);
+        
+        // 根据fund_code查询基金名称
+        FundDetailVO fundDetail = fundInfoService.getFundDetail(transaction.getFundCode());
+        if (fundDetail != null && fundDetail.getBasicInfo() != null) {
+            vo.setFundName(fundDetail.getBasicInfo().getFundName());
+        }
+        
+        return vo;
     }
 
 
