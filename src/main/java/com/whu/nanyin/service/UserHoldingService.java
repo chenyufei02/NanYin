@@ -12,7 +12,8 @@ public interface UserHoldingService extends IService<UserHolding> {
     // 用于根据客户ID查询其所有持仓
     List<UserHolding> listByuserId(Long userId);
 
-
+    // 根据客户ID和基金代码或名称查询持仓
+    List<UserHolding> listByUserIdAndFundInfo(Long userId, String fundCode, String fundName);
     // 处理一笔新交易并自动更新持仓【交易发生后自动实现 但目前没有在系统里提供进行交易的前端接口 目前只用于批量导入交易数据时自动更新持仓数据】
     void updateHoldingAfterNewTransaction(FundTransaction transaction);
 

@@ -34,13 +34,12 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
     private FundInfoService fundInfoService;
 
     @Override
-    public List<UserHolding> listByuserId(Long userId) {
-        QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
-        queryWrapper.orderByAsc("id"); // 按持仓ID升序，从1开始排序
-        return this.list(queryWrapper);
+    public List<UserHolding> listByuserId(Long userId) { return baseMapper.listByUserId(userId);
     }
 
+    @Override
+    public List<UserHolding> listByUserIdAndFundInfo(Long userId, String fundCode, String fundName) {
+        return baseMapper.listByUserIdAndFundInfo(userId, fundCode, fundName);}
     /**
      * 【核心修正】处理新交易时，同步更新份额、成本、基金名称和【市值】
      */
