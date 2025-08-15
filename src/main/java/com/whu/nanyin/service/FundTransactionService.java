@@ -15,6 +15,8 @@ public interface FundTransactionService extends IService<FundTransaction> {
 
     List<FundTransaction> listByUserId(Long userId);
 
+    // 根据用户ID和交易类型查询交易记录
+    List<FundTransaction> listByUserIdAndTransactionType(Long userId, String transactionType);
 
     // 根据交易ID和用户ID，安全地获取单条交易详情
     FundTransaction getTransactionByIdAndUserId(Long transactionId, Long userId);

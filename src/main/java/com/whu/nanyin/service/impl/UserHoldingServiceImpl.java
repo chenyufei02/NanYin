@@ -37,6 +37,7 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
     public List<UserHolding> listByuserId(Long userId) {
         QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
+        queryWrapper.orderByAsc("id"); // 按持仓ID升序，从1开始排序
         return this.list(queryWrapper);
     }
 

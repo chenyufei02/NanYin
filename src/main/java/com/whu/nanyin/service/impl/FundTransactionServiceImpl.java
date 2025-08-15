@@ -128,7 +128,16 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     public List<FundTransaction> listByUserId(Long userId) {
         QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        queryWrapper.orderByDesc("transaction_time"); // 按交易时间降序
+        queryWrapper.orderByAsc("id"); // 按交易ID升序，从1开始排序
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public List<FundTransaction> listByUserIdAndTransactionType(Long userId, String transactionType) {
+        QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.eq("transaction_type", transactionType);
+        queryWrapper.orderByAsc("id"); // 按交易ID升序，从1开始排序
         return this.list(queryWrapper);
     }
 
