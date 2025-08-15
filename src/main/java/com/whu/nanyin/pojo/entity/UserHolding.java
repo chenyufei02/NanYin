@@ -19,6 +19,7 @@ public class UserHolding {
     private BigDecimal marketValue;
     private BigDecimal averageCost;
     private LocalDateTime lastUpdateDate;
+    private String fundName;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

@@ -12,19 +12,31 @@ public class FundTransaction {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField("user_id")
     private Long userId;
 
+    @TableField("fund_code")
     private String fundCode;
+    @TableField("transaction_type")
     private String transactionType;
+    @TableField("transaction_amount")
     private BigDecimal transactionAmount;
+    @TableField("transaction_shares")
     private BigDecimal transactionShares;
+    @TableField("share_price")
     private BigDecimal sharePrice;
+    @TableField("transaction_time")
     private LocalDateTime transactionTime;
+    @TableField("status")
     private String status;
 
-    @TableField(fill = FieldFill.INSERT)
+    // 购买所用银行卡号
+    @TableField("bank_account_number")
+    private String bankAccountNumber;
+
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 }

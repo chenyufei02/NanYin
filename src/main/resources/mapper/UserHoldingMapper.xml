@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whu.nanyin.mapper.UserHoldingMapper">
+    <!-- 基本的CRUD操作由MyBatis-Plus自动实现，无需在此定义 -->
+    
+    <!-- 根据用户ID查询持仓列表 -->
+    <select id="listByUserId" resultType="com.whu.nanyin.pojo.entity.UserHolding">
+        SELECT * FROM user_holdings WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 根据用户ID和基金代码或名称查询持仓 -->
+    <select id="listByUserIdAndFundInfo" resultType="com.whu.nanyin.pojo.entity.UserHolding">
+        SELECT * FROM user_holdings 
+        WHERE user_id = #{userId}
+        <if test="fundCode != null and fundCode != ''">
+            AND fund_code LIKE CONCAT('%', #{fundCode}, '%')
+        </if>
+        <if test="fundName != null and fundName != ''">
+            AND fund_name LIKE CONCAT('%', #{fundName}, '%')
+        </if>
+    </select>
+    
+    <!-- 获取用户市值排名前N的持仓 -->
+    <select id="getTopNHoldings" resultType="com.whu.nanyin.pojo.entity.UserHolding">
+        SELECT * FROM user_holdings 
+        WHERE user_id = #{userId}
+        ORDER BY market_value DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

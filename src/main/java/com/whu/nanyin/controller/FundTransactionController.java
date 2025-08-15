@@ -4,6 +4,8 @@ import com.whu.nanyin.pojo.dto.FundPurchaseDTO;
 import com.whu.nanyin.pojo.dto.FundRedeemDTO;
 import com.whu.nanyin.pojo.entity.FundTransaction;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
+import com.whu.nanyin.mapper.UserMapper;
+import com.whu.nanyin.pojo.entity.User;
 import com.whu.nanyin.pojo.vo.FundTransactionVO;
 import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.FundTransactionService;
@@ -15,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +29,9 @@ public class FundTransactionController {
 
     @Autowired
     private FundTransactionService fundTransactionService;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Operation(summary = "申购基金")
     @PostMapping("/purchase")
@@ -37,6 +44,15 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
+            // 查询最新余额，用于回传给前端直接展示
+            User currentUser = userMapper.selectById(currentUserId);
+            if (currentUser != null) {
+                vo.setAvailableBalance(currentUser.getBalance());
+            }
 
             return ResponseEntity.ok(ApiResponseVO.success("申购成功", vo));
         } catch (Exception e) {
@@ -55,6 +71,8 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
 
             return ResponseEntity.ok(ApiResponseVO.success("赎回成功", vo));
         } catch (Exception e) {
@@ -64,19 +82,23 @@ public class FundTransactionController {
 
     @Operation(summary = "查询【当前登录用户】的所有交易记录")
     @GetMapping("/my-transactions")
-    public ResponseEntity<ApiResponseVO<List<FundTransactionVO>>> getMyTransactions(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getMyTransactions(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
         List<FundTransaction> transactionEntities = fundTransactionService.listByUserId(currentUserId);
-
+    
         List<FundTransactionVO> transactionVOs = transactionEntities.stream().map(entity -> {
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
             // 注意：这里未来可能需要关联查询基金名称(fundName)、客户姓名(customerName)等
             return vo;
         }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(ApiResponseVO.success("交易记录获取成功", transactionVOs));
+    
+        Map<String, Object> response = new HashMap<>();
+        response.put("transactions", transactionVOs);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "根据交易ID查询【当前用户】的单条交易详情")
@@ -89,6 +111,8 @@ public class FundTransactionController {
 
             FundTransactionVO vo = new FundTransactionVO();
             BeanUtils.copyProperties(entity, vo);
+            // 确保银行卡号字段被正确复制
+            vo.setBankAccountNumber(entity.getBankAccountNumber());
 
             return ResponseEntity.ok(ApiResponseVO.success("交易详情获取成功", vo));
         } catch (Exception e) {

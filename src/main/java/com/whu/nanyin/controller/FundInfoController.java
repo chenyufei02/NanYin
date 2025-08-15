@@ -4,12 +4,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.whu.nanyin.pojo.entity.FundBasicInfo;
 import com.whu.nanyin.pojo.vo.ApiResponseVO;
 import com.whu.nanyin.pojo.vo.FundDetailVO;
+import com.whu.nanyin.pojo.vo.FundNetValueTrendVO;
 import com.whu.nanyin.service.FundInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/fund-info")
@@ -45,6 +50,20 @@ public class FundInfoController {
         } else {
             return ResponseEntity.status(404).body(ApiResponseVO.error("找不到对应的基金信息"));
         }
+    }
+
+    @Operation(summary = "获取指定时间范围内的基金净值走势数据")
+    @GetMapping("/net-value-trends")
+    public ResponseEntity<ApiResponseVO<Map<String, List<FundNetValueTrendVO>>>> getFundNetValueTrends(
+            @RequestParam String fundCodes,
+            @RequestParam String startDate,
+            @RequestParam String endDate
+    ) {
+        List<String> fundCodeList = List.of(fundCodes);
+        LocalDateTime startDateTime = LocalDateTime.parse(startDate + "T00:00:00");
+        LocalDateTime endDateTime = LocalDateTime.parse(endDate + "T23:59:59");
+        Map<String, List<FundNetValueTrendVO>> trends = fundInfoService.getFundNetValueTrends(fundCodeList, startDateTime, endDateTime);
+        return ResponseEntity.ok(ApiResponseVO.success("基金净值走势数据获取成功", trends));
     }
 
 }
