@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -65,5 +64,6 @@ public class FundInfoController {
         Map<String, List<FundNetValueTrendVO>> trends = fundInfoService.getFundNetValueTrends(fundCodeList, startDateTime, endDateTime);
         return ResponseEntity.ok(ApiResponseVO.success("基金净值走势数据获取成功", trends));
     }
+
 
 }

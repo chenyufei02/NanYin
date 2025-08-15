@@ -1,5 +1,6 @@
 package com.whu.nanyin.pojo.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import javax.validation.constraints.NotBlank;
@@ -27,4 +28,10 @@ public class FundRedeemDTO {
     @NotNull(message = "交易申请时间不能为空")
     @Schema(description = "交易申请时间", example = "2025-07-04T14:30:00")
     private LocalDateTime transactionTime;
+
+    // 【【【 新增字段 】】】
+    @NotBlank(message = "收款银行卡号不能为空")
+    @Schema(description = "赎回资金收款银行卡号", example = "622202*********1234")
+    @JsonProperty("bank_account_number") // 确保JSON字段名与前端一致
+    private String bankAccountNumber;
 }

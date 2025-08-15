@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.whu.nanyin.pojo.entity.FundBasicInfo;
 import com.whu.nanyin.pojo.vo.FundDetailVO; // <-- 需要新建这个VO
 import com.whu.nanyin.pojo.vo.FundNetValueTrendVO;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -46,4 +45,5 @@ public interface FundInfoService {
         LocalDateTime startDate,
         LocalDateTime endDate
     );
+
 }
