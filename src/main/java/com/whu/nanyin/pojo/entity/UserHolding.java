@@ -20,6 +20,10 @@ public class UserHolding {
     private BigDecimal averageCost;
     private LocalDateTime lastUpdateDate;
     private String fundName;
+    
+    // 最新净值字段，从fund_net_value表中获取
+    @TableField(exist = false)
+    private BigDecimal latestNetValue;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
