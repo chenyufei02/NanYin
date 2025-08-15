@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.whu.nanyin.mapper.UserProfileMapper;
 import com.whu.nanyin.pojo.dto.UserProfileUpdateDTO;
 import com.whu.nanyin.pojo.entity.UserProfile;
-import com.whu.nanyin.pojo.vo.ProfitLossVO;
 import com.whu.nanyin.service.UserProfileService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -37,8 +36,4 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
         return userProfile;
     }
 
-    @Override
-    public ProfitLossVO getProfitLossVOByUserId(Long userId) {
-        return getBaseMapper().getProfitLossVOByUserId(userId);
-    }
 }
