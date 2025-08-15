@@ -88,10 +88,11 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
         }
         holding.setTotalShares(newTotalShares);
 
-        // --- 【【【 新增逻辑：计算并更新最新市值 】】】 ---
+        // --- 【【【 新增逻辑：计算并更新最新市值和最新净值 】】】 ---
         // 最新市值 = 最新总份额 * 最新净值
         BigDecimal newMarketValue = newTotalShares.multiply(latestNetValue).setScale(2, RoundingMode.HALF_UP);
         holding.setMarketValue(newMarketValue);
+        holding.setLatestNetValue(latestNetValue);
 
         // 3. 更新时间戳并保存
         holding.setLastUpdateDate(LocalDateTime.now());

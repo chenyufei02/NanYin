@@ -85,16 +85,9 @@ public class FundTransactionController {
     public ResponseEntity<Map<String, Object>> getMyTransactions(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
-        List<FundTransaction> transactionEntities = fundTransactionService.listByUserId(currentUserId);
-    
-        List<FundTransactionVO> transactionVOs = transactionEntities.stream().map(entity -> {
-            FundTransactionVO vo = new FundTransactionVO();
-            BeanUtils.copyProperties(entity, vo);
-            // 确保银行卡号字段被正确复制
-            vo.setBankAccountNumber(entity.getBankAccountNumber());
-            // 注意：这里未来可能需要关联查询基金名称(fundName)、客户姓名(customerName)等
-            return vo;
-        }).collect(Collectors.toList());
+        
+        // 使用新方法获取包含基金名称的交易记录
+        List<FundTransactionVO> transactionVOs = fundTransactionService.listByUserIdWithFundName(currentUserId);
     
         Map<String, Object> response = new HashMap<>();
         response.put("transactions", transactionVOs);
@@ -107,12 +100,8 @@ public class FundTransactionController {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
         try {
-            FundTransaction entity = fundTransactionService.getTransactionByIdAndUserId(id, currentUserId);
-
-            FundTransactionVO vo = new FundTransactionVO();
-            BeanUtils.copyProperties(entity, vo);
-            // 确保银行卡号字段被正确复制
-            vo.setBankAccountNumber(entity.getBankAccountNumber());
+            // 使用新方法获取包含基金名称的交易详情
+            FundTransactionVO vo = fundTransactionService.getTransactionByIdAndUserIdWithFundName(id, currentUserId);
 
             return ResponseEntity.ok(ApiResponseVO.success("交易详情获取成功", vo));
         } catch (Exception e) {

@@ -21,6 +21,9 @@ public class UserHoldingVO {
 
     @Schema(description = "当前市值")
     private BigDecimal marketValue;
+    
+    @Schema(description = "最新净值")
+    private BigDecimal latestNetValue;
 
     @Schema(description = "持仓最后更新日期")
     private LocalDateTime lastUpdateDate;
