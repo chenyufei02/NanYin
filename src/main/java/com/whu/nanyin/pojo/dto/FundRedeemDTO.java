@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @Schema(description = "基金赎回请求对象")
 public class FundRedeemDTO {
 
+    @Schema(description = "用户ID", example = "1")
+    private Long userId;
+
     @NotBlank(message = "基金代码不能为空")
     @Schema(description = "基金代码", example = "000001")
     private String fundCode;
@@ -26,7 +29,6 @@ public class FundRedeemDTO {
     @Schema(description = "交易申请时间", example = "2025-07-04T14:30:00")
     private LocalDateTime transactionTime;
 
-    // 【【【 新增字段 】】】
     @NotBlank(message = "收款银行卡号不能为空")
     @Schema(description = "赎回资金收款银行卡号", example = "622202*********1234")
     @JsonProperty("bank_account_number") // 确保JSON字段名与前端一致
