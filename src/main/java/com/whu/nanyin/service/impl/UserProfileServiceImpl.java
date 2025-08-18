@@ -20,7 +20,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
     }
 
     /**
-     * 【核心修正】此方法现在接收一个从安全上下文传来的、绝对可靠的userId
+     * 此方法接收一个从安全上下文传来的、绝对可靠的userId
      */
     @Override
     @Transactional
