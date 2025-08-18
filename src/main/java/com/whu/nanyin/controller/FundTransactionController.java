@@ -54,7 +54,6 @@ public class FundTransactionController {
 
     /**
      * 申购基金接口
-     * 
      * 用户通过此接口申购指定基金，系统会：
      * 1. 验证用户身份和申购参数
      * 2. 检查用户账户余额是否充足
