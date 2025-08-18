@@ -5,36 +5,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.whu.nanyin.mapper.UserHoldingMapper;
 import com.whu.nanyin.pojo.entity.FundTransaction;
 import com.whu.nanyin.pojo.entity.UserHolding;
-import com.whu.nanyin.pojo.entity.UserProfile;
 import com.whu.nanyin.pojo.vo.FundDetailVO;
-import com.whu.nanyin.pojo.vo.UserHoldingVO;
 import com.whu.nanyin.service.FundInfoService;
 import com.whu.nanyin.service.UserHoldingService;
-import com.whu.nanyin.service.UserProfileService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * @description 用户持仓服务的实现类，负责具体的业务逻辑处理。
- * 继承自MyBatis-Plus的ServiceImpl，简化了与Mapper层的交互。
- */
+// 继承自MyBatis-Plus的ServiceImpl，简化了与Mapper层的交互。
 @Service
 public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserHolding> implements UserHoldingService {
 
-    // 自动注入UserProfileService，用于获取用户信息
-    @Autowired
-    private UserProfileService userProfileService;
-    // 自动注入FundInfoService，用于获取基金的详细信息
+
     @Autowired
     private FundInfoService fundInfoService;
 
@@ -45,7 +32,9 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
      */
     @Override
     public List<UserHolding> listByuserId(Long userId) {
-        // 调用Mapper层定义的自定义方法来执行查询
+        // baseMapper是来自MP的ServiceImpl父类提供的mapper 在继承ServiceImpl父类的时候传入了参数
+        // <UserHoldingMapper, UserHolding> 表明是对UserHolding对象进行处理 并已自动注入UserHoldingMapper实例继承baseMapper
+        // 因此这里直接使用baseMapper进行调用即可，也因此后面的方法是自己注入的UserHoldingMapper里写好的方法
         return baseMapper.listByUserId(userId);
     }
 
@@ -58,7 +47,7 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
      */
     @Override
     public List<UserHolding> listByUserIdAndFundInfo(Long userId, String fundCode, String fundName) {
-        // 调用Mapper层定义的带条件查询的方法
+        // 同上
         return baseMapper.listByUserIdAndFundInfo(userId, fundCode, fundName);
     }
 
@@ -127,37 +116,4 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
         this.saveOrUpdate(holding);
     }
 
-    /**
-     * @description 获取指定用户市值排名前N的持仓记录。
-     * @param userId 用户的唯一ID。
-     * @param limit  要返回的记录数量。
-     * @return 包含持仓视图对象(VO)的列表。
-     */
-    @Override
-    @Transactional(readOnly = true) // 设置为只读事务，提高查询性能
-    public List<UserHoldingVO> getTopNHoldings(Long userId, int limit) {
-        List<UserHolding> topHoldings;
-        QueryWrapper<UserHolding> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId)
-                    .orderByDesc("market_value") // 按市值降序排序
-                    .last("LIMIT " + limit); // 限制返回的记录数
-        topHoldings = this.list(queryWrapper);
-
-        // 如果没有持仓记录，返回一个空列表
-        if (topHoldings.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 获取用户信息以填充VO中的userName字段
-        UserProfile userProfile = userProfileService.getUserProfileByUserId(userId);
-        String userName = (userProfile != null) ? userProfile.getName() : "未知用户";
-
-        // 将持仓实体(Entity)列表转换为视图对象(VO)列表
-        return topHoldings.stream().map(holding -> {
-            UserHoldingVO vo = new UserHoldingVO();
-            BeanUtils.copyProperties(holding, vo); // 属性复制
-            vo.setUserName(userName); // 设置用户姓名
-            return vo;
-        }).collect(Collectors.toList());
-    }
 }

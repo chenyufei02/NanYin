@@ -7,8 +7,6 @@ import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.UserHoldingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +26,6 @@ import java.util.stream.Collectors;
 @Tag(name = "个人持仓管理", description = "提供个人持仓的查询接口")
 public class UserHoldingController {
 
-    // 初始化日志记录器
-    private static final Logger logger = LoggerFactory.getLogger(UserHoldingController.class);
-
-    // 自动注入UserHoldingService，用于处理业务逻辑
     @Autowired
     private UserHoldingService userHoldingService;
 
@@ -70,23 +64,13 @@ public class UserHoldingController {
             holdingEntities = userHoldingService.listByuserId(currentUserId);
         }
 
-        // 使用Java Stream API将实体对象(Entity)列表转换为视图对象(VO)列表
-        List<UserHoldingVO> holdingVOs = holdingEntities.stream().map(entity -> {
+        // 使用Java Stream 将实体对象(Entity)列表转换为视图对象(VO)列表
+        List<UserHoldingVO> holdingVOs = holdingEntities.stream().map(userHolding -> {
             UserHoldingVO vo = new UserHoldingVO();
-            // 使用BeanUtils.copyProperties进行属性的快速复制
-            BeanUtils.copyProperties(entity, vo);
+            // 进行属性复制
+            BeanUtils.copyProperties(userHolding, vo);
             return vo;
         }).collect(Collectors.toList());
-
-        // 在服务器日志中输出返回给前端的数据总数，用于调试和监控
-        logger.info("返回给前台的持仓数据总数: {}", holdingVOs.size());
-
-        // 遍历VO列表，在日志中详细输出每项持仓的关键信息，便于问题排查
-        for (UserHoldingVO vo : holdingVOs) {
-            logger.info("持仓项: 基金代码={}, 基金名称={}, 持有份额={}, 最新净值={}, 市值={}",
-                    vo.getFundCode(), vo.getFundName(), vo.getTotalShares(),
-                    vo.getLatestNetValue(), vo.getMarketValue());
-        }
 
         // 使用ApiResponseVO对最终结果进行统一格式的包装，并返回成功的HTTP响应
         return ResponseEntity.ok(ApiResponseVO.success("持仓列表获取成功", holdingVOs));
