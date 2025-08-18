@@ -16,14 +16,14 @@ import java.util.List;
 public interface UserHoldingMapper extends BaseMapper<UserHolding> {
 
     /**
-     * @description 根据用户ID查询其完整的持仓列表。
+     * @description 根据用户ID查询其【完整的】持仓列表。
      * @param userId 用户的唯一ID。
      * @return 返回该用户的持仓实体列表。
      */
     List<UserHolding> listByUserId(@Param("userId") Long userId);
 
     /**
-     * @description 根据用户ID和可选的基金代码或名称，筛选查询持仓列表。
+     * @description 根据【用户ID和可选的基金代码或名称】，筛选查询持仓列表。
      * @param userId   用户的唯一ID。
      * @param fundCode 基金代码（可选，用于模糊匹配）。
      * @param fundName 基金名称（可选，用于模糊匹配）。
@@ -34,11 +34,4 @@ public interface UserHoldingMapper extends BaseMapper<UserHolding> {
         @Param("fundCode") String fundCode,
         @Param("fundName") String fundName);
 
-    /**
-     * @description 获取指定用户按市值降序排列的前N条持仓记录。
-     * @param userId 用户的唯一ID。
-     * @param limit  要查询的记录数量。
-     * @return 返回市值排名前N的持仓实体列表。
-     */
-    List<UserHolding> getTopNHoldings(@Param("userId") Long userId, @Param("limit") int limit);
 }

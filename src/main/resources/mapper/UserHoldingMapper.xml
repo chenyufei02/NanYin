@@ -4,62 +4,46 @@
 
     <!-- 根据用户ID查询持仓列表，并关联最新净值 -->
     <select id="listByUserId" resultType="com.whu.nanyin.pojo.entity.UserHolding">
-        SELECT
-            h.*,
-            nv.unit_net_value AS latest_net_value
-        FROM
-            user_holdings h
-                LEFT JOIN (
-                SELECT
-                    fnv.fund_code AS fund_code,
-                    fnv.unit_net_value AS unit_net_value
-                FROM
-                    fund_net_value fnv
-                        INNER JOIN (
-                        SELECT
-                            fund_code,
-                            MAX(end_date) AS latest_date
-                        FROM
-                            fund_net_value
-                        GROUP BY
-                            fund_code
-                    ) latest
-                                   ON fnv.fund_code = latest.fund_code
-                                       AND fnv.end_date = latest.latest_date
-            ) nv
-                          ON h.fund_code = nv.fund_code
-        WHERE
-            h.user_id = #{userId}
+        SELECT  h.*, nv.unit_net_value  AS latest_net_value
+        FROM user_holdings h
+
+        LEFT JOIN (
+            SELECT fund_net_value.fund_code, fund_net_value.unit_net_value
+            FROM fund_net_value
+
+            INNER JOIN (
+                SELECT fund_code, MAX(end_date) AS latest_date
+                FROM fund_net_value
+                GROUP BY fund_code
+            ) latest
+
+            ON fund_net_value.fund_code = latest.fund_code
+            AND fund_net_value.end_date = latest.latest_date
+        ) nv
+
+        ON h.fund_code = nv.fund_code
+        WHERE h.user_id = #{userId}
     </select>
 
     <!-- 根据用户ID和基金代码或名称查询持仓，并关联最新净值 -->
     <select id="listByUserIdAndFundInfo" resultType="com.whu.nanyin.pojo.entity.UserHolding">
-        SELECT
-        h.*,
-        nv.unit_net_value AS latest_net_value
-        FROM
-        user_holdings h
+        SELECT h.*, nv.unit_net_value AS latest_net_value
+        FROM user_holdings h
         LEFT JOIN (
-        SELECT
-        fnv.fund_code AS fund_code,
-        fnv.unit_net_value AS unit_net_value
-        FROM
-        fund_net_value fnv
-        INNER JOIN (
-        SELECT
-        fund_code,
-        MAX(end_date) AS latest_date
-        FROM
-        fund_net_value
-        GROUP BY
-        fund_code
-        ) latest
-        ON fnv.fund_code = latest.fund_code
-        AND fnv.end_date = latest.latest_date
+            SELECT fnv.fund_code AS fund_code, fnv.unit_net_value
+            FROM fund_net_value fnv
+
+            INNER JOIN (
+                SELECT fund_code, MAX(end_date) AS latest_date
+                FROM fund_net_value
+                GROUP BY fund_code
+            ) latest
+            ON fnv.fund_code = latest.fund_code
+            AND fnv.end_date = latest.latest_date
         ) nv
+
         ON h.fund_code = nv.fund_code
-        WHERE
-        h.user_id = #{userId}
+        WHERE h.user_id = #{userId}
         <if test="fundCode != null and fundCode != ''">
             AND h.fund_code LIKE CONCAT('%', #{fundCode}, '%')
         </if>
@@ -68,36 +52,4 @@
         </if>
     </select>
 
-    <!-- 获取用户市值排名前N的持仓，并关联最新净值 -->
-    <select id="getTopNHoldings" resultType="com.whu.nanyin.pojo.entity.UserHolding">
-        SELECT
-            h.*,
-            nv.unit_net_value AS latest_net_value
-        FROM
-            user_holdings h
-                LEFT JOIN (
-                SELECT
-                    fnv.fund_code AS fund_code,
-                    fnv.unit_net_value AS unit_net_value
-                FROM
-                    fund_net_value fnv
-                        INNER JOIN (
-                        SELECT
-                            fund_code,
-                            MAX(end_date) AS latest_date
-                        FROM
-                            fund_net_value
-                        GROUP BY
-                            fund_code
-                    ) latest
-                                   ON fnv.fund_code = latest.fund_code
-                                       AND fnv.end_date = latest.latest_date
-            ) nv
-                          ON h.fund_code = nv.fund_code
-        WHERE
-            h.user_id = #{userId}
-        ORDER BY
-            h.market_value DESC
-            LIMIT #{limit}
-    </select>
 </mapper>
