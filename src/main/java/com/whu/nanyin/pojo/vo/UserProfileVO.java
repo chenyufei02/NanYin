@@ -7,6 +7,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * 客户信息响应视图对象（View Object）。
+ * 用于封装从后端安全地传递到前端页面的个人资料数据，
+ * 只包含前端页面需要展示的字段。
+ */
 @Data
 @Schema(description = "客户信息响应对象")
 public class UserProfileVO {

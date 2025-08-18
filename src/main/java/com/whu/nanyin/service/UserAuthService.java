@@ -1,7 +1,7 @@
 package com.whu.nanyin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.whu.nanyin.mapper.UserMapper; // 注意：这个UserMapper我们下一步创建
+import com.whu.nanyin.mapper.UserMapper;
 import com.whu.nanyin.pojo.entity.User;
 import com.whu.nanyin.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +29,6 @@ public class UserAuthService implements UserDetailsService {
         }
 
         // 3. 如果查询到了用户，将其封装成 Spring Security 可识别的 UserDetails 对象返回
-        //    - user.getUsername(): 用户的账号
-        //    - user.getPassword(): 用户在数据库中已加密的密码
-        //    - new ArrayList<>(): 用户的权限列表（我们暂时留空）
         return new CustomUserDetails(user);
     }
 }
