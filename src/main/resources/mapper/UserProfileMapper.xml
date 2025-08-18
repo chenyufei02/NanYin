@@ -6,20 +6,26 @@
         SELECT
             p.user_id as userId,
             p.name as customerName,
+            -- 使用IFNULL确保即使子查询没有结果（即没有交易或持仓），也返回0而不是null
             IFNULL(inv.total_investment, 0) as totalInvestment,
             IFNULL(mv.total_market_value, 0) as totalMarketValue,
+            -- 计算总盈亏: (总市值 - 总投入)
             (IFNULL(mv.total_market_value, 0) - IFNULL(inv.total_investment, 0)) as totalProfitLoss,
+            -- 计算总盈亏率: (总盈亏 / 总投入) * 100。增加IF判断避免除以0的错误。
             IF(IFNULL(inv.total_investment, 0) > 0, ((IFNULL(mv.total_market_value, 0) - IFNULL(inv.total_investment, 0)) / inv.total_investment) * 100, 0) as profitLossRate
         FROM
             user_profiles p
+        -- 左连接(LEFT JOIN)一个子查询(inv)，用于计算用户的累计总投资额
         LEFT JOIN (
             SELECT
                 user_id,
+                -- 使用CASE语句：如果是'申购'，则累加金额；如果是其他（即赎回），则减去金额
                 SUM(CASE WHEN transaction_type = '申购' THEN transaction_amount ELSE -transaction_amount END) as total_investment
             FROM user_transactions
             WHERE user_id = #{userId}
             GROUP BY user_id
         ) inv ON p.user_id = inv.user_id
+        -- 左连接(LEFT JOIN)另一个子查询(mv)，用于计算用户所有持仓的当前总市值
         LEFT JOIN (
             SELECT
                 user_id,
@@ -28,6 +34,7 @@
             WHERE user_id = #{userId}
             GROUP BY user_id
         ) mv ON p.user_id = mv.user_id
+        -- 查询条件：指定用户ID
         WHERE p.user_id = #{userId}
     </select>
 
