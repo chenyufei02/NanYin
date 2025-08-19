@@ -12,7 +12,7 @@
             -- 计算总盈亏: (总市值 - 总投入)
             (IFNULL(mv.total_market_value, 0) - IFNULL(inv.total_investment, 0)) as totalProfitLoss,
             -- 计算总盈亏率: (总盈亏 / 总投入) * 100。增加IF判断避免除以0的错误。
-            IF(IFNULL(inv.total_investment, 0) > 0, ((IFNULL(mv.total_market_value, 0) - IFNULL(inv.total_investment, 0)) / inv.total_investment) * 100, 0) as profitLossRate
+            IF( IFNULL(inv.total_investment,0)>0 , ((IFNULL(mv.total_market_value, 0)-IFNULL(inv.total_investment,0))/inv.total_investment)*100 , 0) as profitLossRate
         FROM
             user_profiles p
         -- 左连接(LEFT JOIN)一个子查询(inv)，用于计算用户的累计总投资额

@@ -99,6 +99,7 @@ public class UserProfileController {
         }
     }
 
+
     /**
      * 获取当前登录用户的主页（仪表盘）所需的全部聚合数据。
      * @param authentication Spring Security认证信息。
