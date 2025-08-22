@@ -64,17 +64,16 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
         queryWrapper.eq("user_id", transaction.getUserId())
                 .eq("fund_code", transaction.getFundCode());
         UserHolding holding = this.getOne(queryWrapper);
-
+    
         // 2. 获取基金的详细信息，为后续计算做准备
         FundDetailVO fundDetail = fundInfoService.getFundDetail(transaction.getFundCode());
         // 使用Assert进行断言，确保基金信息和业绩信息存在，否则抛出异常中断事务
         Assert.notNull(fundDetail, "交易失败：找不到基金 " + transaction.getFundCode() + " 的详细信息。");
         Assert.notNull(fundDetail.getPerformance(), "交易失败：基金 " + transaction.getFundCode() + " 暂无业绩信息。");
-
+    
         BigDecimal latestNetValue = fundDetail.getPerformance().getUnitNetValue();
         Assert.notNull(latestNetValue, "交易失败：基金 " + transaction.getFundCode() + " 最新净值未知。");
-
-
+    
         // 3. 如果不存在持仓记录，则创建一个新的持仓对象
         if (holding == null) {
             holding = new UserHolding();
@@ -85,7 +84,7 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
             // 从基金详情中获取并设置基金名称
             holding.setFundName(fundDetail.getBasicInfo().getFundName());
         }
-
+    
         // 4. 根据交易类型，更新份额和成本价
         BigDecimal newTotalShares;
         if ("申购".equals(transaction.getTransactionType())) {
@@ -104,14 +103,23 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
             newTotalShares = holding.getTotalShares().subtract(transaction.getTransactionShares());
         }
         holding.setTotalShares(newTotalShares);
-
-        // 5. 新增逻辑：计算并更新最新的市值和净值
-        // 最新市值 = 最新的总份额 * 最新的基金净值
+    
+        // 5. 检查赎回后份额是否为0，如果为0则删除持仓记录
+        if ("赎回".equals(transaction.getTransactionType()) && 
+            newTotalShares.compareTo(BigDecimal.ZERO) <= 0) {
+            // 份额为0或负数时，删除持仓记录
+            if (holding.getId() != null) {
+                this.removeById(holding.getId());
+            }
+            return; // 删除后直接返回，不需要更新记录
+        }
+    
+        // 6.  最新市值 = 最新的总份额 * 最新的基金净值
         BigDecimal newMarketValue = newTotalShares.multiply(latestNetValue).setScale(2, RoundingMode.HALF_UP);
         holding.setMarketValue(newMarketValue);
         holding.setLatestNetValue(latestNetValue);
-
-        // 6. 更新时间戳并保存或更新持仓记录到数据库
+    
+        // 7. 更新时间戳并保存或更新持仓记录到数据库
         holding.setLastUpdateDate(LocalDateTime.now());
         this.saveOrUpdate(holding);
     }
