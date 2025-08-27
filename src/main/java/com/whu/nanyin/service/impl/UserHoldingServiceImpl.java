@@ -1,6 +1,7 @@
 package com.whu.nanyin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.whu.nanyin.mapper.UserHoldingMapper;
 import com.whu.nanyin.pojo.entity.FundTransaction;
@@ -49,6 +50,23 @@ public class UserHoldingServiceImpl extends ServiceImpl<UserHoldingMapper, UserH
     public List<UserHolding> listByUserIdAndFundInfo(Long userId, String fundCode, String fundName) {
         // 同上
         return baseMapper.listByUserIdAndFundInfo(userId, fundCode, fundName);
+    }
+    
+    /**
+     * @description 分页查询用户持仓列表，支持按基金代码或名称筛选。
+     * @param pageNum   当前页码。
+     * @param pageSize  每页记录数。
+     * @param userId    用户的唯一ID。
+     * @param fundCode  基金代码（可选）。
+     * @param fundName  基金名称（可选）。
+     * @return 分页后的持仓记录列表。
+     */
+    @Override
+    public Page<UserHolding> getHoldingsByPage(int pageNum, int pageSize, Long userId, String fundCode, String fundName) {
+        // 创建分页对象
+        Page<UserHolding> page = new Page<>(pageNum, pageSize);
+        // 调用Mapper层的分页查询方法
+        return baseMapper.getHoldingsByPage(page, userId, fundCode, fundName);
     }
 
     /**

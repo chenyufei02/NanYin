@@ -1,5 +1,6 @@
 package com.whu.nanyin.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.whu.nanyin.pojo.entity.UserHolding;
 import com.whu.nanyin.pojo.entity.FundTransaction;
@@ -26,6 +27,17 @@ public interface UserHoldingService extends IService<UserHolding> {
      * @return 返回符合条件的持仓实体对象列表。
      */
     List<UserHolding> listByUserIdAndFundInfo(Long userId, String fundCode, String fundName);
+    
+    /**
+     * @description 分页查询用户持仓列表，支持按基金代码或名称筛选。
+     * @param pageNum   当前页码。
+     * @param pageSize  每页记录数。
+     * @param userId    用户的唯一ID。
+     * @param fundCode  基金代码 (可选的筛选条件)。
+     * @param fundName  基金名称 (可选的筛选条件)。
+     * @return 返回分页后的持仓实体对象列表。
+     */
+    Page<UserHolding> getHoldingsByPage(int pageNum, int pageSize, Long userId, String fundCode, String fundName);
 
     /**
      * @description 在一笔新的基金交易（申购/赎回）发生后，调用此方法来更新用户的持仓信息。

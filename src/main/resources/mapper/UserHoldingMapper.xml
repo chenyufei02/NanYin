@@ -51,5 +51,32 @@
             AND h.fund_name LIKE CONCAT('%', #{fundName}, '%')
         </if>
     </select>
+    
+    <!-- 分页查询用户持仓列表，支持按基金代码或名称筛选，并关联最新净值 -->
+    <select id="getHoldingsByPage" resultType="com.whu.nanyin.pojo.entity.UserHolding">
+        SELECT h.*, nv.unit_net_value AS latest_net_value
+        FROM user_holdings h
+        LEFT JOIN (
+            SELECT fnv.fund_code AS fund_code, fnv.unit_net_value
+            FROM fund_net_value fnv
+
+            INNER JOIN (
+                SELECT fund_code, MAX(end_date) AS latest_date
+                FROM fund_net_value
+                GROUP BY fund_code
+            ) latest
+            ON fnv.fund_code = latest.fund_code
+            AND fnv.end_date = latest.latest_date
+        ) nv
+
+        ON h.fund_code = nv.fund_code
+        WHERE h.user_id = #{userId}
+        <if test="fundCode != null and fundCode != ''">
+            AND h.fund_code LIKE CONCAT('%', #{fundCode}, '%')
+        </if>
+        <if test="fundName != null and fundName != ''">
+            AND h.fund_name LIKE CONCAT('%', #{fundName}, '%')
+        </if>
+    </select>
 
 </mapper>
