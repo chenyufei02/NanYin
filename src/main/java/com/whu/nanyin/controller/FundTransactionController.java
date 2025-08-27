@@ -196,4 +196,47 @@ public class FundTransactionController {
             return ResponseEntity.status(403).body(ApiResponseVO.error(e.getMessage()));
         }
     }
+
+    /**
+     * 获取指定基金的银行卡号接口
+     * 
+     * 根据基金代码获取当前用户最近一次申购该基金时使用的银行卡号
+     * 用于在赎回页面显示银行卡信息
+     * 
+     * @param fundCode 基金代码
+     * @param authentication Spring Security认证对象，包含当前登录用户信息
+     * @return ResponseEntity包装的ApiResponseVO，成功时返回银行卡号信息，失败时返回错误信息
+     */
+    @Operation(summary = "获取指定基金的银行卡号")
+    @GetMapping("/bank-account/{fundCode}")
+    public ResponseEntity<ApiResponseVO<Map<String, Object>>> getBankAccountByFundCode(
+            @PathVariable String fundCode, 
+            Authentication authentication) {
+        try {
+            // 从认证对象中获取当前登录用户的详细信息
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Long currentUserId = userDetails.getId();
+            
+            // 获取最新的申购交易记录
+            FundTransaction latestPurchase = fundTransactionService.getLatestPurchaseTransaction(currentUserId, fundCode);
+            
+            if (latestPurchase == null || latestPurchase.getBankAccountNumber() == null) {
+                return ResponseEntity.badRequest().body(
+                    ApiResponseVO.error("未找到该基金的申购记录或银行卡信息")
+                );
+            }
+            
+            // 构建返回数据
+            Map<String, Object> result = new HashMap<>();
+            result.put("bankAccountNumber", latestPurchase.getBankAccountNumber());
+            result.put("createTime", latestPurchase.getCreateTime()); 
+            result.put("fundCode", fundCode);
+            
+            return ResponseEntity.ok(ApiResponseVO.success("银行卡号获取成功", result));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                ApiResponseVO.error("获取银行卡号失败: " + e.getMessage())
+            );
+        }
+    }
 }

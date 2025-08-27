@@ -29,8 +29,13 @@ public class FundRedeemDTO {
     @Schema(description = "交易申请时间", example = "2025-07-04T14:30:00")
     private LocalDateTime transactionTime;
 
-    @NotBlank(message = "收款银行卡号不能为空")
-    @Schema(description = "赎回资金收款银行卡号", example = "622202*********1234")
+    // 移除了 @NotBlank 注解，使银行卡号变为可选
+    @Schema(description = "赎回资金收款银行卡号（可选，如不提供将自动使用购买时的银行卡号）", example = "622202*********1234")
     @JsonProperty("bank_account_number") // 确保JSON字段名与前端一致
+    /**
+     * 银行卡号（可选）
+     * 
+     * <p>如果不提供，系统将自动使用购买时的银行卡号</p>
+     */
     private String bankAccountNumber;
 }

@@ -12,6 +12,8 @@ public interface FundTransactionService extends IService<FundTransaction> {
     // 创建一个新方法，它不仅保存交易，还负责触发持仓更新
     FundTransaction createPurchaseTransaction(FundPurchaseDTO dto);
 
+    FundTransaction getLatestPurchaseTransaction(Long userId, String fundCode);
+
     FundTransaction createRedeemTransaction(FundRedeemDTO dto);
 
     List<FundTransaction> listByUserId(Long userId);

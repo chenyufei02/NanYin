@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -191,8 +192,8 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
         transaction.setUserId(dto.getUserId());
         transaction.setFundCode(dto.getFundCode());
         transaction.setTransactionAmount(dto.getTransactionAmount());
-        transaction.setTransactionTime(dto.getTransactionTime());
-
+        transaction.setTransactionTime(LocalDateTime.now());
+        
         // 设置银行卡号（重要：确保数据完整性）
         transaction.setBankAccountNumber(dto.getBankAccountNumber());
 
@@ -209,13 +210,34 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
     }
 
     /**
+     * 根据用户ID和基金代码查询最近的申购交易记录
+     * 
+     * <p>用于获取用户购买指定基金时使用的银行卡号，以便在赎回时使用相同的银行卡。</p>
+     * 
+     * @param userId 用户唯一标识ID
+     * @param fundCode 基金代码
+     * @return 最近的申购交易记录，如果没有找到则返回null
+     */
+    @Override
+    public FundTransaction getLatestPurchaseTransaction(Long userId, String fundCode) {
+        QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId)
+                   .eq("fund_code", fundCode)
+                   .eq("transaction_type", "申购")
+                   .orderByDesc("create_time")
+                   .last("LIMIT 1");
+        return this.getOne(queryWrapper);
+    }
+
+    /**
      * 创建基金赎回交易
      * 
-     * <p>处理用户卖出基金的完整业务流程，确保持仓充足和资金安全。</p>
+     * <p>处理用户卖出基金的完整业务流程，自动使用购买时的银行卡号进行赎回。</p>
      * 
      * <h3>业务流程：</h3>
      * <ol>
      *   <li><strong>持仓校验</strong>：验证用户持有足够的基金份额</li>
+     *   <li><strong>银行卡查询</strong>：自动获取购买时使用的银行卡号</li>
      *   <li><strong>净值获取</strong>：获取基金最新单位净值</li>
      *   <li><strong>金额计算</strong>：根据赎回份额和净值计算可获得金额</li>
      *   <li><strong>资金返还</strong>：将赎回金额加入用户账户余额</li>
@@ -223,28 +245,10 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
      *   <li><strong>持仓更新</strong>：同步减少用户持仓份额</li>
      * </ol>
      * 
-     * <h3>计算公式：</h3>
-     * <pre>
-     * 赎回金额 = 赎回份额 × 单位净值
-     * 精度：保留2位小数，使用四舍五入
-     * </pre>
-     * 
-     * <h3>安全机制：</h3>
-     * <ul>
-     *   <li><strong>持仓校验</strong>：严格检查用户持仓份额是否充足</li>
-     *   <li><strong>实时净值</strong>：使用最新净值确保公平交易</li>
-     *   <li><strong>事务保护</strong>：确保资金操作和记录更新的原子性</li>
-     * </ul>
-     * 
-     * @param dto 赎回请求数据传输对象，包含用户ID、基金代码、赎回份额、交易时间、银行卡号等信息
+     * @param dto 赎回请求数据传输对象，包含用户ID、基金代码、赎回份额、交易时间等信息
      * @return 创建并保存的交易记录实体，包含数据库生成的交易ID和计算得出的赎回金额
-     * @throws InsufficientFundsException 当用户持仓份额不足时抛出，错误信息包含当前持仓和尝试赎回的份额
-     * @throws IllegalArgumentException 当基金信息无效或净值缺失时抛出
-     * @throws RuntimeException 当交易记录保存失败时抛出
-     * @see FundRedeemDTO
-     * @see FundTransaction
-     * @see UserHolding
-     * @see #saveTransactionAndUpdateHolding(FundTransaction)
+     * @throws InsufficientFundsException 当用户持仓份额不足时抛出
+     * @throws IllegalArgumentException 当基金信息无效或找不到购买记录时抛出
      */
     @Override
     @Transactional
@@ -258,28 +262,35 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
             throw new InsufficientFundsException("赎回失败：份额不足。当前持有 " + availableShares + " 份，尝试赎回 " + dto.getTransactionShares().toPlainString() + " 份。");
         }
 
-        // 2. 获取基金最新净值
+        // 2. 自动获取购买时使用的银行卡号
+        FundTransaction latestPurchase = getLatestPurchaseTransaction(dto.getUserId(), dto.getFundCode());
+        if (latestPurchase == null || latestPurchase.getBankAccountNumber() == null) {
+            throw new IllegalArgumentException("赎回失败：找不到该基金的购买记录或银行卡信息。");
+        }
+        String bankAccountNumber = latestPurchase.getBankAccountNumber();
+
+        // 3. 获取基金最新净值
         FundDetailVO fundDetail = fundInfoService.getFundDetail(dto.getFundCode());
         Assert.notNull(fundDetail, "找不到对应的基金信息：" + dto.getFundCode());
         Assert.notNull(fundDetail.getPerformance(), "该基金暂无有效的业绩信息，无法交易。");
         BigDecimal sharePrice = fundDetail.getPerformance().getUnitNetValue();
         Assert.notNull(sharePrice, "该基金暂无有效的净值信息，无法交易。");
 
-        // 3. 计算赎回可获得的金额 (份额 × 净值)，保留2位小数
+        // 4. 计算赎回可获得的金额 (份额 × 净值)，保留2位小数
         BigDecimal redeemAmount = dto.getTransactionShares().multiply(sharePrice).setScale(2, RoundingMode.HALF_UP);
 
-        // 4. 将赎回金额增加到用户的可用余额中
+        // 5. 将赎回金额增加到用户的可用余额中
         User user = userMapper.selectById(dto.getUserId());
         user.setBalance(user.getBalance().add(redeemAmount));
         userMapper.updateById(user);
 
-        // 5. 创建并保存交易记录实体
+        // 6. 创建并保存交易记录实体
         FundTransaction transaction = new FundTransaction();
         transaction.setUserId(dto.getUserId());
         transaction.setFundCode(dto.getFundCode());
         transaction.setTransactionShares(dto.getTransactionShares());
-        transaction.setTransactionTime(dto.getTransactionTime());
-        transaction.setBankAccountNumber(dto.getBankAccountNumber());
+        transaction.setTransactionTime(LocalDateTime.now()); // 使用服务器当前时间
+        transaction.setBankAccountNumber(bankAccountNumber); // 使用购买时的银行卡号
         transaction.setTransactionType("赎回");
         transaction.setSharePrice(sharePrice);
         transaction.setStatus("成功");
@@ -287,7 +298,7 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
         // 设置计算出的赎回金额（重要：确保金额准确性）
         transaction.setTransactionAmount(redeemAmount);
 
-        // 6. 保存交易记录并触发持仓更新
+        // 7. 保存交易记录并触发持仓更新
         return saveTransactionAndUpdateHolding(transaction);
     }
 
@@ -314,6 +325,7 @@ public class FundTransactionServiceImpl extends ServiceImpl<FundTransactionMappe
      * @return 该用户的所有交易记录列表，按ID升序排列，如果用户无交易记录则返回空列表
      * @see FundTransaction
      */
+    @Override  
     public List<FundTransaction> listByUserId(Long userId) {
         QueryWrapper<FundTransaction> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
