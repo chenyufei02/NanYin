@@ -1,6 +1,7 @@
 package com.whu.nanyin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.whu.nanyin.pojo.entity.UserHolding;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -30,6 +31,20 @@ public interface UserHoldingMapper extends BaseMapper<UserHolding> {
      * @return 返回符合筛选条件的持仓实体列表。
      */
     List<UserHolding> listByUserIdAndFundInfo(
+        @Param("userId") Long userId,
+        @Param("fundCode") String fundCode,
+        @Param("fundName") String fundName);
+        
+    /**
+     * @description 分页查询用户持仓列表，支持按基金代码或名称筛选。
+     * @param page      分页参数对象。
+     * @param userId    用户的唯一ID。
+     * @param fundCode  基金代码（可选，用于模糊匹配）。
+     * @param fundName  基金名称（可选，用于模糊匹配）。
+     * @return 返回分页后的持仓实体列表。
+     */
+    Page<UserHolding> getHoldingsByPage(
+        @Param("page") Page<UserHolding> page,
         @Param("userId") Long userId,
         @Param("fundCode") String fundCode,
         @Param("fundName") String fundName);
