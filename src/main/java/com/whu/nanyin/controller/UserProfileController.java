@@ -1,4 +1,3 @@
-// 文件路径: src/main/java/com/whu/nanyin/controller/UserProfileController.java
 package com.whu.nanyin.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,7 +10,6 @@ import com.whu.nanyin.pojo.vo.UserDashboardVO;
 import com.whu.nanyin.pojo.vo.UserProfileVO;
 import com.whu.nanyin.security.CustomUserDetails;
 import com.whu.nanyin.service.FundInfoService;
-import com.whu.nanyin.service.FundTransactionService;
 import com.whu.nanyin.service.UserHoldingService;
 import com.whu.nanyin.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,14 +20,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 个人中心控制器，负责处理与个人资料查询、更新及主页数据聚合相关的API请求。
+ */
 @RestController
 @RequestMapping("/api/user")
 @Tag(name = "个人中心", description = "提供个人资料查询、更新及主页数据聚合的接口")
@@ -38,26 +37,37 @@ public class UserProfileController {
     @Autowired private UserProfileService userProfileService;
     @Autowired private UserHoldingService userHoldingService;
     @Autowired private FundInfoService fundInfoService;
-    @Autowired private FundTransactionService fundTransactionService;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper; // Jackson库的核心类，用于JSON序列化和反序列化
     @Autowired private UserMapper userMapper;
 
-    // ... (getMyProfile, updateUserProfile, getMyDashboard 方法保持不变) ...
+    /**
+     * 获取当前登录用户的个人资料。
+     * @param authentication Spring Security提供的认证信息对象。
+     * @return 包含UserProfileVO的统一API响应。
+     */
     @GetMapping("/profile")
     @Operation(summary = "获取当前登录用户的个人资料")
     public ResponseEntity<ApiResponseVO<UserProfileVO>> getMyProfile(Authentication authentication) {
+        // 从认证信息中获取当前登录用户的ID
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
+
+        // 调用Service层获取用户的个人资料实体
         UserProfile userProfileEntity = userProfileService.getUserProfileByUserId(currentUserId);
+        // 从users表获取用户登录信息，主要是为了其中的余额字段
         User currentUser = userMapper.selectById(currentUserId);
 
+        // 如果是新注册用户，可能还没有个人资料
         if (userProfileEntity == null) {
             return ResponseEntity.ok(ApiResponseVO.success("新用户，暂无个人资料", null));
         }
 
+        // 创建视图对象(VO)，用于向前端返回数据
         UserProfileVO userProfileVO = new UserProfileVO();
+        // 将实体(Entity)的属性复制到视图对象(VO)中
         BeanUtils.copyProperties(userProfileEntity, userProfileVO);
 
+        // 如果用户信息存在，则将余额信息也设置到VO中
         if (currentUser != null) {
             userProfileVO.setBalance(currentUser.getBalance());
         }
@@ -65,21 +75,36 @@ public class UserProfileController {
         return ResponseEntity.ok(ApiResponseVO.success("个人资料获取成功", userProfileVO));
     }
 
+    /**
+     * 更新当前登录用户的个人资料。
+     * @param dto 包含待更新字段的数据传输对象(DTO)。
+     * @param authentication Spring Security认证信息。
+     * @return 更新后的个人资料VO。
+     */
     @PutMapping("/profile")
     @Operation(summary = "更新当前登录用户的个人资料")
     public ResponseEntity<ApiResponseVO<UserProfileVO>> updateUserProfile(@RequestBody @Validated UserProfileUpdateDTO dto, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long currentUserId = userDetails.getId();
         try {
+            // 调用Service层执行更新操作
             UserProfile updatedProfileEntity = userProfileService.updateUserProfile(currentUserId, dto);
             UserProfileVO updatedProfileVO = new UserProfileVO();
+            // 将更新后的实体属性复制到VO
             BeanUtils.copyProperties(updatedProfileEntity, updatedProfileVO);
             return ResponseEntity.ok(ApiResponseVO.success("个人资料更新成功", updatedProfileVO));
         } catch (RuntimeException e) {
+            // 如果Service层抛出异常（例如找不到用户），则返回404错误
             return ResponseEntity.status(404).body(ApiResponseVO.error(e.getMessage()));
         }
     }
 
+
+    /**
+     * 获取当前登录用户的主页（仪表盘）所需的全部聚合数据。
+     * @param authentication Spring Security认证信息。
+     * @return 包含所有主页数据的UserDashboardVO。
+     */
     @GetMapping("/dashboard")
     @Operation(summary = "获取当前登录用户的主页仪表盘所有数据")
     public ResponseEntity<ApiResponseVO<UserDashboardVO>> getMyDashboard(Authentication authentication) {
@@ -90,17 +115,20 @@ public class UserProfileController {
         Long currentUserId = userDetails.getId();
 
         try {
+            // 创建主页的聚合VO对象
             UserDashboardVO dashboardVO = new UserDashboardVO();
+
+            // 1. 获取并设置账户余额
             User currentUser = userMapper.selectById(currentUserId);
             if (currentUser != null) {
                 dashboardVO.setBalance(currentUser.getBalance());
             }
+            // 2. 获取并设置个人基础资料
             dashboardVO.setUserProfile(userProfileService.getUserProfileByUserId(currentUserId));
+            // 3. 获取并设置盈亏统计数据
             dashboardVO.setProfitLossStats(userProfileService.getProfitLossVOByUserId(currentUserId));
-            dashboardVO.setTopHoldings(userHoldingService.getTopNHoldings(currentUserId, 10));
-
+            // 4. 调用私有辅助方法，准备图表所需的数据
             prepareChartData(currentUserId, dashboardVO);
-            prepareHistoricalData(currentUserId, dashboardVO);
 
             return ResponseEntity.ok(ApiResponseVO.success("主页数据获取成功", dashboardVO));
         } catch (Exception e) {
@@ -109,10 +137,14 @@ public class UserProfileController {
         }
     }
 
-    // =================================================================
-    // ==                  私有辅助方法 (最终修正版)                    ==
-    // =================================================================
 
+    // ===================私有辅助方法=========================
+    /**
+     * 准备前端图表（如环形图、雷达图）所需的数据，并序列化为JSON字符串。
+     * @param userId      当前用户ID。
+     * @param vo          主页聚合数据VO对象。
+     * @throws JsonProcessingException 如果JSON序列化失败。
+     */
     private void prepareChartData(Long userId, UserDashboardVO vo) throws JsonProcessingException {
         List<UserHolding> holdings = userHoldingService.listByuserId(userId);
         if (holdings == null || holdings.isEmpty()) {
@@ -120,79 +152,52 @@ public class UserProfileController {
             return;
         }
 
-        // --- 【【【 核心修正第一处：对持仓记录中的fund_code进行trim 】】】 ---
+
         List<String> fundCodes = holdings.stream()
-            .map(h -> h.getFundCode().trim()) // <--- 强制trim
+            .map(h -> h.getFundCode()) // 强制trim
             .distinct()
             .toList();
 
-        // --- 【【【 核心修正第二处：构建Map时，对作为Key的fund_code进行trim 】】】 ---
+        // 在构建用于快速查找的Map时，也对作为Key的fund_code进行trim()
         Map<String, FundBasicInfo> fundInfoMap = fundInfoService.listAllBasicInfos().stream()
-                .filter(info -> fundCodes.contains(info.getFundCode().trim())) // <--- 匹配时也trim
+                .filter(info -> fundCodes.contains(info.getFundCode()))
                 .collect(Collectors.toMap(
-                    info -> info.getFundCode().trim(), // <--- 用trim后的结果作为Key
+                    info -> info.getFundCode(), // 使用trim后的结果作为Key
                     Function.identity()
                 ));
 
-        // --- 【【【 核心修正第三处：查找Map时，对用于查找的fund_code进行trim 】】】 ---
+        // 核心修正：根据持仓的市值和基金类型进行分组聚合，计算各类资产的总市值
         Map<String, BigDecimal> assetAllocationData = holdings.stream()
                 .filter(h -> {
-                    FundBasicInfo info = fundInfoMap.get(h.getFundCode().trim()); // <--- 查找时也trim
+                    // 查找时也对fund_code进行trim()
+                    FundBasicInfo info = fundInfoMap.get(h.getFundCode());
                     return info != null && h.getMarketValue() != null && h.getMarketValue().compareTo(BigDecimal.ZERO) > 0;
                 })
                 .collect(Collectors.groupingBy(
-                    h -> translateFundTypeCode(fundInfoMap.get(h.getFundCode().trim()).getFundInvestType()), // <--- 查找时也trim
+                    // 分组的Key是翻译后的基金类型名称
+                    h -> translateFundTypeCode(fundInfoMap.get(h.getFundCode()).getFundInvestType()),
+                    // 对同一类型下的所有持仓市值进行求和
                     Collectors.reducing(BigDecimal.ZERO, UserHolding::getMarketValue, BigDecimal::add)
                 ));
 
+        // 将聚合后的数据序列化为JSON字符串，存入VO
         vo.setAssetAllocationJson(objectMapper.writeValueAsString(assetAllocationData));
-        // 注意：因为雷达图也依赖同样的数据，所以我们暂时只生成assetAllocationJson
     }
 
-    // ... (其他所有私有辅助方法保持不变) ...
-    private void prepareHistoricalData(Long userId, UserDashboardVO vo) throws JsonProcessingException {
-        List<FundTransaction> transactions = fundTransactionService.listByUserId(userId);
-        if (transactions == null || transactions.isEmpty()) {
-            vo.setHistoricalDataJson("{}");
-            vo.setMonthlyFlowJson("{}");
-            return;
-        }
-        Map<String, Map<String, BigDecimal>> historicalData = getStringMapMap(transactions);
-        Map<String, BigDecimal> monthlyFlowData = transactions.stream().collect(Collectors.groupingBy(tx -> tx.getTransactionTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM")), Collectors.mapping(tx -> "申购".equals(tx.getTransactionType()) ? tx.getTransactionAmount() : tx.getTransactionAmount().negate(), Collectors.reducing(BigDecimal.ZERO, BigDecimal::add))));
-        Map<String, BigDecimal> sortedMonthlyFlow = new java.util.LinkedHashMap<>();
-        monthlyFlowData.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(e -> sortedMonthlyFlow.put(e.getKey(), e.getValue()));
-        vo.setHistoricalDataJson(objectMapper.writeValueAsString(historicalData));
-        vo.setMonthlyFlowJson(objectMapper.writeValueAsString(sortedMonthlyFlow));
-    }
-    private static Map<String, Map<String, BigDecimal>> getStringMapMap(List<FundTransaction> transactions) {
-         Map<String, Map<String, BigDecimal>> historicalData = new java.util.LinkedHashMap<>();
-         BigDecimal cumulativeInvestment = BigDecimal.ZERO;
-         Map<String, BigDecimal> currentShares = new java.util.HashMap<>();
-         for (FundTransaction tx : transactions) {
-             String date = tx.getTransactionTime().toLocalDate().toString();
-             String fundCode = tx.getFundCode();
-             if ("申购".equals(tx.getTransactionType())) {
-                 cumulativeInvestment = cumulativeInvestment.add(tx.getTransactionAmount());
-                 currentShares.put(fundCode, currentShares.getOrDefault(fundCode, BigDecimal.ZERO).add(tx.getTransactionShares()));
-             } else {
-                 cumulativeInvestment = cumulativeInvestment.subtract(tx.getTransactionAmount());
-                 currentShares.put(fundCode, currentShares.getOrDefault(fundCode, BigDecimal.ZERO).subtract(tx.getTransactionShares()));
-             }
-             BigDecimal totalMarketValue = BigDecimal.ZERO;
-             for (Map.Entry<String, BigDecimal> entry : currentShares.entrySet()) {
-                 totalMarketValue = totalMarketValue.add(entry.getValue().multiply(tx.getSharePrice() != null ? tx.getSharePrice() : BigDecimal.ONE));
-             }
-             Map<String, BigDecimal> dailyData = new java.util.HashMap<>();
-             dailyData.put("assets", totalMarketValue.setScale(2, RoundingMode.HALF_UP));
-             dailyData.put("investment", cumulativeInvestment.setScale(2, RoundingMode.HALF_UP));
-             historicalData.put(date, dailyData);
-         }
-         return historicalData;
-    }
+
+    /**
+     * 当用户没有持仓数据时，设置图表数据为空JSON对象。
+     * @param vo 主页聚合数据VO对象。
+     */
     private void setEmptyChartData(UserDashboardVO vo) {
         vo.setAssetAllocationJson("{}");
-        vo.setRiskInsightJson("{}"); // 保持这个，即使现在没用到
     }
+
+    /**
+     * 将数据库中的基金投资类型代码翻译为可读的中文名称。
+     * @param typeCode 基金类型代码。
+     * @return 对应的中文名称。
+     */
     private String translateFundTypeCode(String typeCode) {
          if (typeCode == null) return "其他";
          return switch (typeCode) {

@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         user.setBalance(new BigDecimal("999999.00"));
         userMapper.insert(user); // 注意：执行后，user对象会自动获得数据库生成的ID
 
-        // 2. 【新增】为该用户创建一条空的个人资料记录 (user_profiles表)
+        // 2. 为该用户创建一条空的个人资料记录 (user_profiles表)
         UserProfile userProfile = new UserProfile();
         userProfile.setUserId(user.getId()); // 使用刚刚创建的用户的ID
         // 可以为新用户设置一个默认名字

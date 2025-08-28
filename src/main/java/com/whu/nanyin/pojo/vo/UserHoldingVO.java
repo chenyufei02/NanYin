@@ -5,6 +5,10 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 客户持仓视图对象（View Object）。
+ * 用于封装从后端传递到前端页面的数据，结构与前端展示的需求保持一致。
+ */
 @Data
 @Schema(description = "客户持仓视图对象")
 public class UserHoldingVO {

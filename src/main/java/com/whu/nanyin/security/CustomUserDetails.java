@@ -13,7 +13,7 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    public Long getId() { // 【核心】提供一个获取ID的方法
+    public Long getId() { // 提供一个获取ID的方法
         return user.getId();
     }
 
